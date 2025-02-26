@@ -24,8 +24,18 @@ const svgAnimation = {
 export default function ToDoContainer() {
   const [input, setInput] = useState("");
   const [focus, setFocus] = useState("");
-  const [toDoItems, setToDoItems] = useState([]);
   const [textAreaHeight, setTextAreaHeight] = useState([]);
+
+  const [toDoItems, setToDoItems] = useState(() => {
+    const savedItems = localStorage.getItem("toDoItems");
+    return savedItems ? JSON.parse(savedItems) : [];
+  });
+
+  useEffect(() => {
+    if (toDoItems.length > 0) {
+      localStorage.setItem("toDoItems", JSON.stringify(toDoItems));
+    }
+  }, [toDoItems]);
 
   const textareaRef = useRef(null);
 
