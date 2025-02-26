@@ -50,6 +50,15 @@
   width: calc(100% - 50px);
 }
 
+.emptyList {
+  margin-top: 30px;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 40px;
+  position: absolute;
+  top: 100px;
+  width: 100%;
+}
+
 .svgAdd {
   position: absolute;
   right: 5px;

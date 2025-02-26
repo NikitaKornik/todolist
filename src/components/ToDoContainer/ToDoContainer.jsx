@@ -34,6 +34,8 @@ export default function ToDoContainer() {
   useEffect(() => {
     if (toDoItems.length > 0) {
       localStorage.setItem("toDoItems", JSON.stringify(toDoItems));
+    } else {
+      localStorage.removeItem("toDoItems");
     }
   }, [toDoItems]);
 
@@ -126,21 +128,33 @@ export default function ToDoContainer() {
         </div>
       </div>
       <AnimatePresence>
-        {toDoItems.map((item) => {
-          return (
-            <ToDoElement
-              key={item.id}
-              text={item.text}
-              id={item.id}
-              onClickDelete={() => deleteElement(item.id)}
-              onClickEdit={() =>
-                focus !== item.id ? editElement(item.id, item.text) : cancel()
-              }
-              svgAnimation={svgAnimation}
-              focus={focus}
-            />
-          );
-        })}
+        {toDoItems.length ? (
+          toDoItems.map((item) => {
+            return (
+              <ToDoElement
+                key={item.id}
+                text={item.text}
+                id={item.id}
+                onClickDelete={() => deleteElement(item.id)}
+                onClickEdit={() =>
+                  focus !== item.id ? editElement(item.id, item.text) : cancel()
+                }
+                svgAnimation={svgAnimation}
+                focus={focus}
+              />
+            );
+          })
+        ) : (
+          <motion.div
+            className={s.emptyList}
+            animate={{ scale: 1 }}
+            initial={{ scale: 0 }}
+            exit={{ scale: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            Ваш список пуст, пора что-то добавить!
+          </motion.div>
+        )}
       </AnimatePresence>
     </div>
   );
