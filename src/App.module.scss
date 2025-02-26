@@ -1,3 +1,9 @@
+@import "./styles/colors";
+
+body {
+  background-color: $blueGrey-50;
+}
+
 .root {
   text-align: center;
   display: flex;

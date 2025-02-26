@@ -1,0 +1,37 @@
+@import "../../styles/colors";
+
+.root {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 10px;
+  font-size: 16px;
+  border: none;
+  background-color: white;
+  border-radius: 5px;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+
+  &.primary {
+    background-color: $primary;
+  }
+
+  &.disabled {
+    cursor: default;
+    opacity: 0.75;
+  }
+}
+
+.svg {
+  height: 24px;
+  width: 24px;
+
+  &.LeftMargin {
+    margin-right: 7px;
+  }
+  &.RightMargin {
+    margin-left: 7px;
+  }
+}
