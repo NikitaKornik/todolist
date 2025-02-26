@@ -17,6 +17,7 @@ export default function ToDoElement({
   onClickDelete,
   id,
   focus,
+  svgAnimation,
 }) {
   return (
     <motion.div
@@ -27,32 +28,21 @@ export default function ToDoElement({
       exit={{ scale: 0 }}
     >
       <div className={s.text}>{text}</div>
-      <Btn
-        variant="secondary"
-        svgRight={
-          focus !== id ? (
-            <MotionSvgEdit
-              animate={{ scale: 1 }}
-              initial={{ scale: 0 }}
-              exit={{ scale: 0 }}
-            />
+      <Btn variant="secondary" className={s.svgEdit} onClick={onClickEdit}>
+        <AnimatePresence mode="wait">
+          {focus !== id ? (
+            <MotionSvgEdit key="edit" {...svgAnimation} />
           ) : (
-            <MotionSvgCancel
-              animate={{ scale: 1 }}
-              initial={{ scale: 0 }}
-              exit={{ scale: 0 }}
-            />
-          )
-        }
-        className={s.svgEdit}
-        onClick={onClickEdit}
-      />
+            <MotionSvgCancel key="cancel" {...svgAnimation} />
+          )}
+        </AnimatePresence>
+      </Btn>
       <Btn
         variant="danger"
         svgRight={<SvgDelete />}
         className={s.svgDelete}
         onClick={onClickDelete}
-      />
+      ></Btn>
     </motion.div>
   );
 }

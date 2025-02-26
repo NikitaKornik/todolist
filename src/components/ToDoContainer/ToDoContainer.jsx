@@ -1,14 +1,24 @@
 import React, { useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
 import { v4 as uuidv4 } from "uuid";
 
 import { ReactComponent as SvgAdd } from "../../image/add.svg";
-import { ReactComponent as SvgCancel } from "../../image/cancel.svg";
 import { ReactComponent as SvgCheck } from "../../image/check.svg";
+import { ReactComponent as SvgCancel } from "../../image/cancel.svg";
 
 import s from "./ToDoContainer.module.scss";
 import ToDoElement from "../ToDoElement/ToDoElement";
 import Btn from "../UIkit/Btn/Btn";
-import { AnimatePresence } from "framer-motion";
+
+const MotionSvgAdd = motion(SvgAdd);
+const MotionSvgCheck = motion(SvgCheck);
+
+const svgAnimation = {
+  animate: { scale: 1 },
+  initial: { scale: 0 },
+  exit: { scale: 0 },
+  transition: { duration: 0.1 },
+};
 
 export default function ToDoContainer() {
   const [input, setInput] = useState("");
@@ -45,8 +55,8 @@ export default function ToDoContainer() {
   }
 
   function editElement(idItem, text) {
-    setInput(text);
     setFocus(idItem);
+    setInput(text);
   }
 
   return (
@@ -61,12 +71,19 @@ export default function ToDoContainer() {
             placeholder="Введите текст..."
           />
           <Btn
-            svgRight={focus !== "" ? <SvgCheck /> : <SvgAdd />}
             className={s.svgAdd}
             variant={"primary"}
             onClick={addItem}
             disabled={!input}
-          />
+          >
+            <AnimatePresence mode="wait">
+              {focus !== "" ? (
+                <MotionSvgCheck key="check" {...svgAnimation} />
+              ) : (
+                <MotionSvgAdd key="add" {...svgAnimation} />
+              )}
+            </AnimatePresence>
+          </Btn>
           <AnimatePresence>
             {focus !== "" && (
               <Btn
@@ -90,6 +107,7 @@ export default function ToDoContainer() {
               onClickEdit={() =>
                 focus !== item.id ? editElement(item.id, item.text) : cancel()
               }
+              svgAnimation={svgAnimation}
               focus={focus}
             />
           );
