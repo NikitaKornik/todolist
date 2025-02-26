@@ -18,6 +18,14 @@
     background-color: $primary;
   }
 
+  &.danger {
+    background-color: $danger;
+  }
+
+  &.secondary {
+    background-color: $secondary;
+  }
+
   &.disabled {
     cursor: default;
     opacity: 0.75;

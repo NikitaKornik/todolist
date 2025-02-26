@@ -1,0 +1,36 @@
+@import "../../styles/colors";
+
+.root {
+  width: 100%;
+  min-height: 24px;
+  padding: 15px 0px;
+  background-color: $blueGrey-40;
+  border-radius: 5px;
+  overflow: hidden;
+  color: white;
+  text-align: start;
+  position: relative;
+  margin: 10px 0px;
+}
+
+.focus {
+  opacity: 0.5;
+}
+
+.text {
+  width: calc(100% - 90px);
+  padding-left: 15px;
+  overflow: hidden;
+  text-wrap: wrap;
+}
+
+.svgDelete {
+  position: absolute;
+  right: 5px;
+  top: 5px;
+}
+.svgEdit {
+  position: absolute;
+  right: 55px;
+  top: 5px;
+}

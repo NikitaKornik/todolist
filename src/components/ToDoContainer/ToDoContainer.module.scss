@@ -1,0 +1,63 @@
+@import "../../styles/colors";
+
+.root {
+  width: 1040px;
+  padding-top: 100px;
+  position: relative;
+}
+
+.inputContainer {
+  z-index: 3;
+  position: fixed;
+  border-bottom: 1px solid $blueGrey-30;
+  width: 100%;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: 1040px;
+  background-color: $blueGrey-50;
+}
+
+.input {
+  width: 100%;
+  min-height: 24px;
+  background-color: $blueGrey-40;
+  border-radius: 5px;
+  overflow: hidden;
+  color: white;
+  position: relative;
+  margin: 20px 0px;
+  border: 0;
+  display: flex;
+  justify-content: start;
+  align-items: center;
+
+  & input {
+    padding: 0px 15px;
+    width: calc(100% - 70px);
+    margin: 0;
+    font-size: 18px;
+    min-height: 54px;
+    height: 100%;
+    outline: none;
+    border: 0;
+    color: white;
+    background-color: rgba(255, 255, 255, 0);
+  }
+}
+
+.text {
+  width: calc(100% - 50px);
+}
+
+.svgAdd {
+  position: absolute;
+  right: 5px;
+  top: 5px;
+}
+
+.svgCancel {
+  position: absolute;
+  right: 55px;
+  top: 5px;
+}

@@ -13,12 +13,14 @@ export default function Btn({
   submit,
   disabled,
   size,
+  onClick,
 }) {
   return (
     <motion.button
       className={cn(s.root, s[variant], className, {
         [s.disabled]: disabled,
       })}
+      onClick={onClick}
       whileHover={
         !disabled && {
           filter: "brightness(1.1)",
@@ -29,6 +31,9 @@ export default function Btn({
           scale: 0.95,
         }
       }
+      animate={{ scale: 1 }}
+      initial={{ scale: 0 }}
+      exit={{ scale: 0 }}
     >
       {svgLeft && (
         <div
