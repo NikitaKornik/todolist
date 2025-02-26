@@ -1,7 +1,9 @@
 import React from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import cn from "classnames";
+
 import s from "./ToDoElement.module.scss";
+
 import Btn from "../UIkit/Btn/Btn";
 
 import { ReactComponent as SvgDelete } from "../../image/delete.svg";
@@ -28,7 +30,11 @@ export default function ToDoElement({
       exit={{ scale: 0 }}
     >
       <div className={s.text}>{text}</div>
-      <Btn variant="secondary" className={s.svgEdit} onClick={onClickEdit}>
+      <Btn
+        variant="secondary"
+        className={cn(s.svgEdit, s.hover)}
+        onClick={onClickEdit}
+      >
         <AnimatePresence mode="wait">
           {focus !== id ? (
             <MotionSvgEdit key="edit" {...svgAnimation} />
@@ -40,7 +46,7 @@ export default function ToDoElement({
       <Btn
         variant="danger"
         svgRight={<SvgDelete />}
-        className={s.svgDelete}
+        className={cn(s.svgDelete, s.hover)}
         onClick={onClickDelete}
       ></Btn>
     </motion.div>

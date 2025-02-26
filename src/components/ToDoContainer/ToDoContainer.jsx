@@ -1,14 +1,15 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { v4 as uuidv4 } from "uuid";
+
+import s from "./ToDoContainer.module.scss";
+
+import ToDoElement from "../ToDoElement/ToDoElement";
+import Btn from "../UIkit/Btn/Btn";
 
 import { ReactComponent as SvgAdd } from "../../image/add.svg";
 import { ReactComponent as SvgCheck } from "../../image/check.svg";
 import { ReactComponent as SvgCancel } from "../../image/cancel.svg";
-
-import s from "./ToDoContainer.module.scss";
-import ToDoElement from "../ToDoElement/ToDoElement";
-import Btn from "../UIkit/Btn/Btn";
 
 const MotionSvgAdd = motion(SvgAdd);
 const MotionSvgCheck = motion(SvgCheck);
@@ -24,6 +25,22 @@ export default function ToDoContainer() {
   const [input, setInput] = useState("");
   const [focus, setFocus] = useState("");
   const [toDoItems, setToDoItems] = useState([]);
+  const [textAreaHeight, setTextAreaHeight] = useState([]);
+
+  const textareaRef = useRef(null);
+
+  const resizeTextarea = () => {
+    const textarea = textareaRef.current;
+    if (textarea) {
+      textarea.style.height = "auto";
+      textarea.style.height = `${textarea.scrollHeight}px`;
+    }
+    setTextAreaHeight(textarea.scrollHeight + 50);
+  };
+
+  useEffect(() => {
+    resizeTextarea();
+  }, [input]);
 
   function addItem() {
     if (focus === "") {
@@ -60,14 +77,16 @@ export default function ToDoContainer() {
   }
 
   return (
-    <div className={s.root}>
+    <div className={s.root} style={{ paddingTop: `${textAreaHeight}px` }}>
       <div className={s.inputContainer}>
         <div className={s.input}>
-          <input
+          <textarea
+            ref={textareaRef}
             value={input}
             onChange={(e) => {
               setInput(e.target.value);
             }}
+            rows={1}
             placeholder="Введите текст..."
           />
           <Btn

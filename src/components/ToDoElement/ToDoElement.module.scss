@@ -11,6 +11,15 @@
   text-align: start;
   position: relative;
   margin: 10px 0px;
+
+  & .hover {
+    opacity: 0.3;
+    transition: 0.2s;
+  }
+
+  &:hover .hover {
+    opacity: 1;
+  }
 }
 
 .focus {

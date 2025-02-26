@@ -2,8 +2,8 @@
 
 .root {
   width: 1040px;
-  padding-top: 100px;
   position: relative;
+  // padding-top: 100px;
 }
 
 .inputContainer {
@@ -32,17 +32,17 @@
   justify-content: start;
   align-items: center;
 
-  & input {
-    padding: 0px 15px;
-    width: calc(100% - 70px);
-    margin: 0;
-    font-size: 18px;
-    min-height: 54px;
-    height: 100%;
+  & textarea {
+    padding: 20px 0px 0px 15px;
+    width: calc(100% - 120px);
+    font-size: 14px;
     outline: none;
     border: 0;
     color: white;
     background-color: rgba(255, 255, 255, 0);
+    max-height: 500px;
+    resize: none;
+    min-height: 10px;
   }
 }
 
@@ -53,11 +53,11 @@
 .svgAdd {
   position: absolute;
   right: 5px;
-  top: 5px;
+  bottom: 5px;
 }
 
 .svgCancel {
   position: absolute;
   right: 55px;
-  top: 5px;
+  bottom: 5px;
 }
