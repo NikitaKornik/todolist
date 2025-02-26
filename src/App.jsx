@@ -1,5 +1,5 @@
 import s from "./App.module.scss";
-import Btn from "./UIkit/Btn/Btn";
+import Btn from "./components/Btn/Btn";
 
 import { ReactComponent as Heart } from "./image/heart.svg";
 
