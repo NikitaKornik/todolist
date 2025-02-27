@@ -7,12 +7,12 @@ import s from "./ToDoContainer.module.scss";
 import ToDoElement from "../ToDoElement/ToDoElement";
 import Btn from "../UIkit/Btn/Btn";
 
-import { ReactComponent as SvgAdd } from "../../image/add.svg";
-import { ReactComponent as SvgCheck } from "../../image/check.svg";
 import { ReactComponent as SvgCancel } from "../../image/cancel.svg";
+import SvgAdd from "../../image/add.svg";
+import SvgCheck from "../../image/check.svg";
 
-const MotionSvgAdd = motion(SvgAdd);
-const MotionSvgCheck = motion(SvgCheck);
+const MotionSvgAdd = motion.img;
+const MotionSvgCheck = motion.img;
 
 const svgAnimation = {
   animate: { scale: 1 },
@@ -89,7 +89,12 @@ export default function ToDoContainer() {
   }
 
   return (
-    <div className={s.root} style={{ paddingTop: `${textAreaHeight}px` }}>
+    <div
+      className={s.root}
+      style={{
+        paddingTop: textAreaHeight <= 350 ? `${textAreaHeight}px` : "370px",
+      }}
+    >
       <div className={s.inputContainer}>
         <div className={s.input}>
           <textarea
@@ -109,9 +114,9 @@ export default function ToDoContainer() {
           >
             <AnimatePresence mode="wait">
               {focus !== "" ? (
-                <MotionSvgCheck key="check" {...svgAnimation} />
+                <MotionSvgCheck src={SvgCheck} key="check" {...svgAnimation} />
               ) : (
-                <MotionSvgAdd key="add" {...svgAnimation} />
+                <MotionSvgAdd src={SvgAdd} key="add" {...svgAnimation} />
               )}
             </AnimatePresence>
           </Btn>

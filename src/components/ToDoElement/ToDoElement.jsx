@@ -7,11 +7,11 @@ import s from "./ToDoElement.module.scss";
 import Btn from "../UIkit/Btn/Btn";
 
 import { ReactComponent as SvgDelete } from "../../image/delete.svg";
-import { ReactComponent as SvgEdit } from "../../image/edit.svg";
-import { ReactComponent as SvgCancel } from "../../image/cancel.svg";
+import SvgEdit from "../../image/edit.svg";
+import SvgCancel from "../../image/cancel.svg";
 
-const MotionSvgEdit = motion(SvgEdit);
-const MotionSvgCancel = motion(SvgCancel);
+const MotionSvgEdit = motion.img;
+const MotionSvgCancel = motion.img;
 
 export default function ToDoElement({
   text,
@@ -37,9 +37,9 @@ export default function ToDoElement({
       >
         <AnimatePresence mode="wait">
           {focus !== id ? (
-            <MotionSvgEdit key="edit" {...svgAnimation} />
+            <MotionSvgEdit key="edit" src={SvgEdit} {...svgAnimation} />
           ) : (
-            <MotionSvgCancel key="cancel" {...svgAnimation} />
+            <MotionSvgEdit key="cancel" src={SvgCancel} {...svgAnimation} />
           )}
         </AnimatePresence>
       </Btn>
