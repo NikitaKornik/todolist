@@ -39,6 +39,22 @@ export default function ToDoContainer() {
     }
   }, [toDoItems]);
 
+  useEffect(() => {
+    const handleKeyDown = (key) => {
+      focus !== "" && key.key === "Escape" && cancel();
+
+      if (key.key === "Enter" && !key.shiftKey) {
+        key.preventDefault();
+        addItem();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [focus]);
+
   const textareaRef = useRef(null);
 
   const resizeTextarea = () => {
