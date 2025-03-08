@@ -29,6 +29,7 @@
   width: 600px;
   height: 400px;
   padding: 40px;
+  margin: 20px;
   display: flex;
   justify-content: end;
   align-items: center;
@@ -57,11 +58,7 @@
   z-index: 3;
   position: fixed;
   border-top: 1px solid $blueGrey-30;
-  // width: 100%;
   bottom: 0;
-  // left: 18px;
-  // right: 18px;
-  // padding: 0 10px;
   left: 50%;
   transform: translateX(-50%);
   width: calc(100% - 36px);

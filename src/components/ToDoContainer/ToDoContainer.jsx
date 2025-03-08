@@ -37,7 +37,7 @@ export default function ToDoContainer() {
   const [input, setInput] = useState("");
   const [inputCash, setInputCash] = useState("");
   const [focus, setFocus] = useState("");
-  const [popup, setPopup] = useState(false);
+  const [popup, setPopup] = useState("");
   const [textAreaHeight, setTextAreaHeight] = useState([]);
 
   const [toDoItems, setToDoItems] = useState(() => {
@@ -182,15 +182,8 @@ export default function ToDoContainer() {
             variant={"BGprimary"}
             onClick={addItem}
             disabled={!input}
-          >
-            <AnimatePresence mode="wait">
-              {focus !== "" ? (
-                <SvgCheck src={SvgCheck} key="check" {...svgAnimation} />
-              ) : (
-                <SvgAdd src={SvgAdd} key="add" {...svgAnimation} />
-              )}
-            </AnimatePresence>
-          </Btn>
+            svgRight={focus !== "" ? <SvgCheck /> : <SvgAdd />}
+          ></Btn>
           <AnimatePresence>
             {focus !== "" && popup !== true && (
               <Btn
@@ -212,7 +205,6 @@ export default function ToDoContainer() {
                 text={item.text}
                 id={item.id}
                 onClickDelete={() => {
-                  // setPopup(!popup);
                   setPopup(item.id);
                 }}
                 onClickEdit={() =>
