@@ -3,7 +3,7 @@
 .root {
   width: 100%;
   min-height: 24px;
-  padding: 15px 0px;
+  padding: 15px 0px 50px 0px;
   background-color: $blueGrey-40;
   border-radius: 5px;
   overflow: hidden;
@@ -27,8 +27,8 @@
 }
 
 .text {
-  width: calc(100% - 90px);
-  padding-left: 15px;
+  width: 100%;
+  padding: 0px 15px;
   overflow: hidden;
   text-wrap: wrap;
   word-break: break-word;
@@ -38,10 +38,10 @@
 .svgDelete {
   position: absolute;
   right: 5px;
-  top: 5px;
+  bottom: 5px;
 }
 .svgEdit {
   position: absolute;
-  right: 55px;
-  top: 5px;
+  right: 35px;
+  bottom: 5px;
 }

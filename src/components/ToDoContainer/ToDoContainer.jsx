@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { v4 as uuidv4 } from "uuid";
+import cn from "classnames";
 
 import s from "./ToDoContainer.module.scss";
 
@@ -8,11 +9,14 @@ import ToDoElement from "../ToDoElement/ToDoElement";
 import Btn from "../UIkit/Btn/Btn";
 
 import { ReactComponent as SvgCancel } from "../../image/cancel.svg";
-import SvgAdd from "../../image/add.svg";
-import SvgCheck from "../../image/check.svg";
+import { ReactComponent as SvgCheck } from "../../image/check.svg";
+import { ReactComponent as SvgAdd } from "../../image/add.svg";
 
-const MotionSvgAdd = motion.img;
-const MotionSvgCheck = motion.img;
+// import SvgAdd from "../../image/add.svg";
+// import SvgCheck from "../../image/check.svg";
+
+// const MotionSvgAdd = motion.img;
+// const MotionSvgCheck = motion.img;
 
 const svgAnimation = {
   animate: { scale: 1 },
@@ -53,7 +57,7 @@ export default function ToDoContainer() {
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [focus]);
+  }, [focus, input]);
 
   const textareaRef = useRef(null);
 
@@ -108,7 +112,7 @@ export default function ToDoContainer() {
     <div
       className={s.root}
       style={{
-        paddingTop: textAreaHeight <= 350 ? `${textAreaHeight}px` : "370px",
+        paddingBottom: textAreaHeight <= 350 ? `${textAreaHeight}px` : "370px",
       }}
     >
       <div className={s.inputContainer}>
@@ -124,16 +128,21 @@ export default function ToDoContainer() {
           />
           <Btn
             className={s.svgAdd}
-            variant={"primary"}
+            variant={"BGprimary"}
             onClick={addItem}
             disabled={!input}
           >
             <AnimatePresence mode="wait">
               {focus !== "" ? (
+                <SvgCheck src={SvgCheck} key="check" {...svgAnimation} />
+              ) : (
+                <SvgAdd src={SvgAdd} key="add" {...svgAnimation} />
+              )}
+              {/* {focus !== "" ? (
                 <MotionSvgCheck src={SvgCheck} key="check" {...svgAnimation} />
               ) : (
                 <MotionSvgAdd src={SvgAdd} key="add" {...svgAnimation} />
-              )}
+              )} */}
             </AnimatePresence>
           </Btn>
           <AnimatePresence>
@@ -141,7 +150,7 @@ export default function ToDoContainer() {
               <Btn
                 svgRight={<SvgCancel />}
                 className={s.svgCancel}
-                variant={"danger"}
+                variant={"BGdanger"}
                 onClick={cancel}
               />
             )}

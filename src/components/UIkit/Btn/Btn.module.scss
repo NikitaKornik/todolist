@@ -14,16 +14,36 @@
   align-items: center;
   overflow: hidden;
 
-  &.primary {
+  &.BGprimary {
     background-color: $primary;
   }
 
-  &.danger {
+  &.BGdanger {
     background-color: $danger;
   }
 
-  &.secondary {
+  &.BGsecondary {
     background-color: $secondary;
+  }
+
+  &.primary {
+    background-color: #00000000;
+    color: $primary;
+  }
+
+  &.xecondary {
+    background-color: #00000000;
+    color: $secondary;
+  }
+
+  &.danger {
+    background-color: #00000000;
+    color: $danger;
+  }
+
+  &.BGnone {
+    background-color: #00000000;
+    color: $blueGrey-10;
   }
 
   &.disabled {
