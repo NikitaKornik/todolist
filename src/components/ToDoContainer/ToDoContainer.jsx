@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { v4 as uuidv4 } from "uuid";
-import cn from "classnames";
+// import cn from "classnames";
 
 import s from "./ToDoContainer.module.scss";
 
@@ -12,12 +12,6 @@ import { ReactComponent as SvgCancel } from "../../image/cancel.svg";
 import { ReactComponent as SvgCheck } from "../../image/check.svg";
 import { ReactComponent as SvgAdd } from "../../image/add.svg";
 
-// import SvgAdd from "../../image/add.svg";
-// import SvgCheck from "../../image/check.svg";
-
-// const MotionSvgAdd = motion.img;
-// const MotionSvgCheck = motion.img;
-
 const svgAnimation = {
   animate: { scale: 1 },
   initial: { scale: 0 },
@@ -25,9 +19,25 @@ const svgAnimation = {
   transition: { duration: 0.1 },
 };
 
+const blockAnimation = {
+  animate: { scale: 1 },
+  initial: { scale: 0 },
+  exit: { scale: 0 },
+  transition: { duration: 0.2 },
+};
+
+const backGroundAnimation = {
+  animate: { opacity: 1 },
+  initial: { opacity: 0 },
+  exit: { opacity: 0 },
+  transition: { duration: 0.2 },
+};
+
 export default function ToDoContainer() {
   const [input, setInput] = useState("");
+  const [inputCash, setInputCash] = useState("");
   const [focus, setFocus] = useState("");
+  const [popup, setPopup] = useState(false);
   const [textAreaHeight, setTextAreaHeight] = useState([]);
 
   const [toDoItems, setToDoItems] = useState(() => {
@@ -45,11 +55,21 @@ export default function ToDoContainer() {
 
   useEffect(() => {
     const handleKeyDown = (key) => {
-      focus !== "" && key.key === "Escape" && cancel();
-
+      if (key.key === "Escape") {
+        if (popup) {
+          setPopup("");
+        }
+        if (focus !== "") {
+          cancel();
+        }
+      }
       if (key.key === "Enter" && !key.shiftKey) {
-        key.preventDefault();
-        addItem();
+        if (popup) {
+          deleteElement(popup);
+        } else {
+          key.preventDefault();
+          addItem();
+        }
       }
     };
     window.addEventListener("keydown", handleKeyDown);
@@ -57,7 +77,7 @@ export default function ToDoContainer() {
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [focus, input]);
+  }, [popup, focus, input]);
 
   const textareaRef = useRef(null);
 
@@ -86,25 +106,32 @@ export default function ToDoContainer() {
         )
       );
     }
-    setInput("");
+    setInput(inputCash);
+    setInputCash("");
     setFocus("");
   }
 
   function cancel() {
-    setInput("");
+    setInput(inputCash);
+    setInputCash("");
     setFocus("");
   }
 
   function deleteElement(idItem) {
     setToDoItems((prev) => prev.filter((item) => item.id !== idItem));
+    setTimeout(() => {
+      setPopup("");
+    }, 50);
     if (idItem === focus) {
       setFocus("");
-      setInput("");
+      setInput(inputCash);
+      setInputCash("");
     }
   }
 
   function editElement(idItem, text) {
     setFocus(idItem);
+    setInputCash(input);
     setInput(text);
   }
 
@@ -115,6 +142,30 @@ export default function ToDoContainer() {
         paddingBottom: textAreaHeight <= 350 ? `${textAreaHeight}px` : "370px",
       }}
     >
+      <AnimatePresence>
+        {popup && (
+          <motion.div className={s.popup} {...backGroundAnimation}>
+            <motion.div className={s.popupContainer} {...blockAnimation}>
+              <div className={s.popupText}>
+                Вы точно хотите удалить этот элемент?
+              </div>
+              <div className={s.popupBtnContainer}>
+                <Btn
+                  variant="BGprimary"
+                  onClick={() => {
+                    setPopup("");
+                  }}
+                >
+                  Отмена
+                </Btn>
+                <Btn variant="BGdanger" onClick={() => deleteElement(popup)}>
+                  Удалить
+                </Btn>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
       <div className={s.inputContainer}>
         <div className={s.input}>
           <textarea
@@ -138,15 +189,10 @@ export default function ToDoContainer() {
               ) : (
                 <SvgAdd src={SvgAdd} key="add" {...svgAnimation} />
               )}
-              {/* {focus !== "" ? (
-                <MotionSvgCheck src={SvgCheck} key="check" {...svgAnimation} />
-              ) : (
-                <MotionSvgAdd src={SvgAdd} key="add" {...svgAnimation} />
-              )} */}
             </AnimatePresence>
           </Btn>
           <AnimatePresence>
-            {focus !== "" && (
+            {focus !== "" && popup !== true && (
               <Btn
                 svgRight={<SvgCancel />}
                 className={s.svgCancel}
@@ -165,7 +211,10 @@ export default function ToDoContainer() {
                 key={item.id}
                 text={item.text}
                 id={item.id}
-                onClickDelete={() => deleteElement(item.id)}
+                onClickDelete={() => {
+                  // setPopup(!popup);
+                  setPopup(item.id);
+                }}
                 onClickEdit={() =>
                   focus !== item.id ? editElement(item.id, item.text) : cancel()
                 }
@@ -175,13 +224,7 @@ export default function ToDoContainer() {
             );
           })
         ) : (
-          <motion.div
-            className={s.emptyList}
-            animate={{ scale: 1 }}
-            initial={{ scale: 0 }}
-            exit={{ scale: 0 }}
-            transition={{ duration: 0.2 }}
-          >
+          <motion.div className={s.emptyList} {...blockAnimation}>
             Ваш список пуст, пора что-то добавить!
           </motion.div>
         )}
