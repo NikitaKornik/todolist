@@ -57,6 +57,9 @@
   height: 24px;
   width: 24px;
 
+  display: flex;
+  justify-content: center;
+
   &.LeftMargin {
     margin-right: 7px;
   }

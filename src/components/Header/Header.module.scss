@@ -1,0 +1,96 @@
+@import "../../styles/colors";
+
+.root {
+  background-color: $blueGrey-50;
+  height: 50px;
+  max-width: 1076px;
+  width: 100%;
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.container {
+  border-bottom: 1px solid $blueGrey-30;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0px 18px;
+}
+
+.count {
+  color: $text;
+}
+
+.HeaderListItems {
+  list-style-type: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0;
+}
+
+.ListItem {
+  width: 100%;
+  background-color: $blueGrey-40;
+  color: $text;
+  padding: 0px 15px;
+}
+
+.profile {
+  color: $text;
+  position: relative;
+  border: 0;
+  height: 100%;
+  background-color: $blueGrey-50;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-width: 100px;
+  font-size: 18px;
+}
+
+.dropdownMenu {
+  border-radius: 5px;
+  position: absolute;
+  top: 50px;
+  left: 0;
+  width: 100%;
+  min-height: 20px;
+  background-color: $blueGrey-60;
+  list-style-type: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 0;
+  font-size: 14px;
+
+  & li {
+    background-color: $blueGrey-60;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 40px;
+    transition: all 0.2s;
+    width: 100%;
+    cursor: pointer;
+    border-bottom: 1px solid $blueGrey-40;
+
+    &:last-child {
+      border-bottom: none;
+      color: $secondary;
+    }
+
+    &:hover {
+      filter: brightness(1.3);
+    }
+  }
+}

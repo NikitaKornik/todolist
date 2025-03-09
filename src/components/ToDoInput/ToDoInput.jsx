@@ -1,8 +1,8 @@
 import React, { useEffect } from "react";
+import { AnimatePresence } from "framer-motion";
 
 import Btn from "../UIkit/Btn/Btn";
 
-import { AnimatePresence } from "framer-motion";
 import s from "./ToDoInput.module.scss";
 
 import { ReactComponent as SvgCancel } from "../../image/cancel.svg";

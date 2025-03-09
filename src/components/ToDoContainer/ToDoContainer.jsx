@@ -7,6 +7,7 @@ import ToDoElement from "../ToDoElement/ToDoElement";
 import ToDoInput from "../ToDoInput/ToDoInput";
 
 import s from "./ToDoContainer.module.scss";
+import Header from "../Header/Header";
 
 const svgAnimation = {
   animate: { scale: 1 },
@@ -36,13 +37,13 @@ export default function ToDoContainer() {
   const [inputCash, setInputCash] = useState("");
   const [focus, setFocus] = useState("");
   const [popup, setPopup] = useState("");
+  const [profile, setProfile] = useState(0);
   const [textAreaHeight, setTextAreaHeight] = useState([]);
 
   const [toDoItems, setToDoItems] = useState(() => {
     const savedItems = localStorage.getItem("toDoItems");
     return savedItems ? JSON.parse(savedItems) : [];
   });
-  
   useEffect(() => {
     if (toDoItems.length > 0) {
       localStorage.setItem("toDoItems", JSON.stringify(toDoItems));
@@ -125,6 +126,12 @@ export default function ToDoContainer() {
         paddingBottom: textAreaHeight <= 350 ? `${textAreaHeight}px` : "370px",
       }}
     >
+      <Header
+        profile={profile}
+        setProfile={setProfile}
+        blockAnimation={blockAnimation}
+        count={toDoItems.length}
+      />
       <AnimatePresence>
         {popup && (
           <PopupDelete

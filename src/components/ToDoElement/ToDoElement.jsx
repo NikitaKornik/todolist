@@ -1,5 +1,5 @@
 import React from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import { motion } from "framer-motion";
 import cn from "classnames";
 
 import s from "./ToDoElement.module.scss";
@@ -16,7 +16,6 @@ export default function ToDoElement({
   onClickDelete,
   id,
   focus,
-  svgAnimation,
 }) {
   return (
     <motion.div
