@@ -1,16 +1,12 @@
 import React, { useState, useRef, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { v4 as uuidv4 } from "uuid";
-// import cn from "classnames";
+
+import PopupDelete from "../PopupDelete/PopupDelete";
+import ToDoElement from "../ToDoElement/ToDoElement";
+import ToDoInput from "../ToDoInput/ToDoInput";
 
 import s from "./ToDoContainer.module.scss";
-
-import ToDoElement from "../ToDoElement/ToDoElement";
-import Btn from "../UIkit/Btn/Btn";
-
-import { ReactComponent as SvgCancel } from "../../image/cancel.svg";
-import { ReactComponent as SvgCheck } from "../../image/check.svg";
-import { ReactComponent as SvgAdd } from "../../image/add.svg";
 
 const svgAnimation = {
   animate: { scale: 1 },
@@ -34,6 +30,8 @@ const backGroundAnimation = {
 };
 
 export default function ToDoContainer() {
+  const textareaRef = useRef(null);
+
   const [input, setInput] = useState("");
   const [inputCash, setInputCash] = useState("");
   const [focus, setFocus] = useState("");
@@ -44,7 +42,7 @@ export default function ToDoContainer() {
     const savedItems = localStorage.getItem("toDoItems");
     return savedItems ? JSON.parse(savedItems) : [];
   });
-
+  
   useEffect(() => {
     if (toDoItems.length > 0) {
       localStorage.setItem("toDoItems", JSON.stringify(toDoItems));
@@ -78,21 +76,6 @@ export default function ToDoContainer() {
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [popup, focus, input]);
-
-  const textareaRef = useRef(null);
-
-  const resizeTextarea = () => {
-    const textarea = textareaRef.current;
-    if (textarea) {
-      textarea.style.height = "auto";
-      textarea.style.height = `${textarea.scrollHeight}px`;
-    }
-    setTextAreaHeight(textarea.scrollHeight + 50);
-  };
-
-  useEffect(() => {
-    resizeTextarea();
-  }, [input]);
 
   function addItem() {
     if (focus === "") {
@@ -144,58 +127,25 @@ export default function ToDoContainer() {
     >
       <AnimatePresence>
         {popup && (
-          <motion.div className={s.popup} {...backGroundAnimation}>
-            <motion.div className={s.popupContainer} {...blockAnimation}>
-              <div className={s.popupText}>
-                Вы точно хотите удалить этот элемент?
-              </div>
-              <div className={s.popupBtnContainer}>
-                <Btn
-                  variant="BGprimary"
-                  onClick={() => {
-                    setPopup("");
-                  }}
-                >
-                  Отмена
-                </Btn>
-                <Btn variant="BGdanger" onClick={() => deleteElement(popup)}>
-                  Удалить
-                </Btn>
-              </div>
-            </motion.div>
-          </motion.div>
+          <PopupDelete
+            deleteElement={deleteElement}
+            popup={popup}
+            setPopup={setPopup}
+            blockAnimation={blockAnimation}
+            backGroundAnimation={backGroundAnimation}
+          />
         )}
       </AnimatePresence>
-      <div className={s.inputContainer}>
-        <div className={s.input}>
-          <textarea
-            ref={textareaRef}
-            value={input}
-            onChange={(e) => {
-              setInput(e.target.value);
-            }}
-            rows={1}
-            placeholder="Введите текст..."
-          />
-          <Btn
-            className={s.svgAdd}
-            variant={"BGprimary"}
-            onClick={addItem}
-            disabled={!input}
-            svgRight={focus !== "" ? <SvgCheck /> : <SvgAdd />}
-          ></Btn>
-          <AnimatePresence>
-            {focus !== "" && popup !== true && (
-              <Btn
-                svgRight={<SvgCancel />}
-                className={s.svgCancel}
-                variant={"BGdanger"}
-                onClick={cancel}
-              />
-            )}
-          </AnimatePresence>
-        </div>
-      </div>
+      <ToDoInput
+        textareaRef={textareaRef}
+        input={input}
+        setInput={setInput}
+        addItem={addItem}
+        popup={popup}
+        cancel={cancel}
+        focus={focus}
+        setTextAreaHeight={setTextAreaHeight}
+      />
       <AnimatePresence>
         {toDoItems.length ? (
           toDoItems.map((item) => {
