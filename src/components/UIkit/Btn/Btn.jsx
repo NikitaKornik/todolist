@@ -10,6 +10,7 @@ export default function Btn({
   children,
   svgLeft,
   svgRight,
+  svgFill,
   submit,
   disabled,
   size,

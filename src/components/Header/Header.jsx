@@ -8,26 +8,26 @@ import { ReactComponent as ChevronUp } from "../../image/chevronUp.svg";
 
 import s from "./Header.module.scss";
 
-const profileData = [
-  {
-    name: "default",
-    id: 0,
-  },
-  {
-    name: "home",
-    id: 1,
-  },
-  {
-    name: "work",
-    id: 2,
-  },
-  {
-    name: "study",
-    id: 3,
-  },
-];
+// const profileData = [
+//   {
+//     name: "default",
+//     id: 0,
+//   },
+//   {
+//     name: "home",
+//     id: 1,
+//   },
+//   {
+//     name: "work",
+//     id: 2,
+//   },
+//   {
+//     name: "study",
+//     id: 3,
+//   },
+// ];
 
-function Header({ profile, setProfile, blockAnimation, count }) {
+function Header({ profile, setProfile, blockAnimation, count, profileData }) {
   const [openProfiles, setOpenProfiles] = useState(false);
   const dropdownRef = useRef(null);
 

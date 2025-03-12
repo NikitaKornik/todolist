@@ -32,7 +32,7 @@
     color: $primary;
   }
 
-  &.xecondary {
+  &.secondary {
     background-color: #00000000;
     color: $secondary;
   }
@@ -40,6 +40,11 @@
   &.danger {
     background-color: #00000000;
     color: $danger;
+  }
+
+  &.favorite {
+    background-color: #00000000;
+    color: $favorite;
   }
 
   &.BGnone {

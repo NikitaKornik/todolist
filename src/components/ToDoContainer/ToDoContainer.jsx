@@ -9,12 +9,31 @@ import ToDoInput from "../ToDoInput/ToDoInput";
 import s from "./ToDoContainer.module.scss";
 import Header from "../Header/Header";
 
-const svgAnimation = {
-  animate: { scale: 1 },
-  initial: { scale: 0 },
-  exit: { scale: 0 },
-  transition: { duration: 0.1 },
-};
+// const svgAnimation = {
+//   animate: { scale: 1 },
+//   initial: { scale: 0 },
+//   exit: { scale: 0 },
+//   transition: { duration: 0.1 },
+// };
+
+const profileData = [
+  {
+    name: "default",
+    id: 0,
+  },
+  {
+    name: "home",
+    id: 1,
+  },
+  {
+    name: "work",
+    id: 2,
+  },
+  {
+    name: "study",
+    id: 3,
+  },
+];
 
 const blockAnimation = {
   animate: { scale: 1 },
@@ -51,7 +70,6 @@ export default function ToDoContainer() {
       localStorage.removeItem("toDoItems");
     }
   }, [toDoItems]);
-
   useEffect(() => {
     const handleKeyDown = (key) => {
       if (key.key === "Escape") {
@@ -79,9 +97,18 @@ export default function ToDoContainer() {
   }, [popup, focus, input]);
 
   function addItem() {
+    console.log(toDoItems);
     if (focus === "") {
       if (input.trim()) {
-        setToDoItems((prev) => [...prev, { id: uuidv4(), text: input }]);
+        setToDoItems((prev) => [
+          ...prev,
+          {
+            id: uuidv4(),
+            text: input,
+            favorite: false,
+            profile: profileData[profile].name,
+          },
+        ]);
       }
     } else {
       setToDoItems((prev) =>
@@ -131,6 +158,7 @@ export default function ToDoContainer() {
         setProfile={setProfile}
         blockAnimation={blockAnimation}
         count={toDoItems.length}
+        profileData={profileData}
       />
       <AnimatePresence>
         {popup && (
@@ -161,14 +189,24 @@ export default function ToDoContainer() {
                 key={item.id}
                 text={item.text}
                 id={item.id}
-                onClickDelete={() => {
-                  setPopup(item.id);
-                }}
+                onClickFavorite={() =>
+                  setToDoItems((prev) =>
+                    prev.map((elem) =>
+                      elem.id === item.id
+                        ? { ...elem, favorite: !elem.favorite }
+                        : elem
+                    )
+                  )
+                }
                 onClickEdit={() =>
                   focus !== item.id ? editElement(item.id, item.text) : cancel()
                 }
-                svgAnimation={svgAnimation}
+                onClickDelete={() => {
+                  setPopup(item.id);
+                }}
+                blockAnimation={blockAnimation}
                 focus={focus}
+                favorite={item.favorite}
               />
             );
           })
