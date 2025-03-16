@@ -11,6 +11,7 @@
   text-align: start;
   position: relative;
   margin: 10px 0px;
+  transition: 0.2s background-color;
 
   & .hover {
     opacity: 0.3;
@@ -49,6 +50,14 @@
   position: absolute;
   right: 75px;
   bottom: 5px;
+}
+
+.profile {
+  position: absolute;
+  left: 15px;
+  bottom: 10px;
+  font-size: 12px;
+  color: $blueGrey-30;
 }
 
 .favorite {

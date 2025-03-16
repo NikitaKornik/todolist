@@ -12,12 +12,24 @@ import { ReactComponent as SvgCancel } from "../../image/cancel.svg";
 import { ReactComponent as SvgHeart } from "../../image/heart.svg";
 import { ReactComponent as SvgHeartFill } from "../../image/heartFill.svg";
 
+const ToDoElementAnimation = {
+  animate: {
+    height: "auto",
+    minHeight: "24px",
+    padding: "15px 0px 50px 0px",
+    margin: "10px 0px",
+  },
+  initial: { height: 0, minHeight: 0, padding: 0, margin: 0 },
+  exit: { height: 0, minHeight: 0, padding: 0, margin: 0 },
+  transition: { duration: 0.2 },
+};
+
 export default function ToDoElement({
   text,
   onClickEdit,
   onClickDelete,
   onClickFavorite,
-  blockAnimation,
+  profile,
   favorite,
   id,
   focus,
@@ -29,11 +41,12 @@ export default function ToDoElement({
         [s.favorite]: favorite,
       })}
       id={id}
-      {...blockAnimation}
+      {...ToDoElementAnimation}
     >
       <div className={s.text}>{text}</div>
+      <div className={s.profile}>{profile}</div>
       <Btn
-        variant="secondary"
+        variant={favorite ? "secondary" : "BGnone"}
         svgRight={favorite ? <SvgHeartFill /> : <SvgHeart />}
         className={cn(s.svgHeart, s.hover)}
         onClick={onClickFavorite}

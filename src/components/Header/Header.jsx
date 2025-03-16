@@ -8,26 +8,14 @@ import { ReactComponent as ChevronUp } from "../../image/chevronUp.svg";
 
 import s from "./Header.module.scss";
 
-// const profileData = [
-//   {
-//     name: "default",
-//     id: 0,
-//   },
-//   {
-//     name: "home",
-//     id: 1,
-//   },
-//   {
-//     name: "work",
-//     id: 2,
-//   },
-//   {
-//     name: "study",
-//     id: 3,
-//   },
-// ];
+const dropDownAnimation = {
+  animate: { height: "auto" },
+  initial: { height: 0 },
+  exit: { height: 0 },
+  transition: { duration: 0.2 },
+};
 
-function Header({ profile, setProfile, blockAnimation, count, profileData }) {
+function Header({ profile, setProfile, count, profileData }) {
   const [openProfiles, setOpenProfiles] = useState(false);
   const dropdownRef = useRef(null);
 
@@ -62,7 +50,7 @@ function Header({ profile, setProfile, blockAnimation, count, profileData }) {
             </Btn>
             <AnimatePresence>
               {openProfiles && (
-                <motion.ul className={s.dropdownMenu} {...blockAnimation}>
+                <motion.ul className={s.dropdownMenu} {...dropDownAnimation}>
                   {profileData.map((listItem) => {
                     return (
                       <li

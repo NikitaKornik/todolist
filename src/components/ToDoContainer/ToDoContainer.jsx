@@ -18,7 +18,7 @@ import Header from "../Header/Header";
 
 const profileData = [
   {
-    name: "default",
+    name: "all",
     id: 0,
   },
   {
@@ -63,6 +63,7 @@ export default function ToDoContainer() {
     const savedItems = localStorage.getItem("toDoItems");
     return savedItems ? JSON.parse(savedItems) : [];
   });
+
   useEffect(() => {
     if (toDoItems.length > 0) {
       localStorage.setItem("toDoItems", JSON.stringify(toDoItems));
@@ -70,6 +71,7 @@ export default function ToDoContainer() {
       localStorage.removeItem("toDoItems");
     }
   }, [toDoItems]);
+
   useEffect(() => {
     const handleKeyDown = (key) => {
       if (key.key === "Escape") {
@@ -156,7 +158,6 @@ export default function ToDoContainer() {
       <Header
         profile={profile}
         setProfile={setProfile}
-        blockAnimation={blockAnimation}
         count={toDoItems.length}
         profileData={profileData}
       />
@@ -183,33 +184,76 @@ export default function ToDoContainer() {
       />
       <AnimatePresence>
         {toDoItems.length ? (
-          toDoItems.map((item) => {
-            return (
-              <ToDoElement
-                key={item.id}
-                text={item.text}
-                id={item.id}
-                onClickFavorite={() =>
-                  setToDoItems((prev) =>
-                    prev.map((elem) =>
-                      elem.id === item.id
-                        ? { ...elem, favorite: !elem.favorite }
-                        : elem
+          profile === 0 ? (
+            toDoItems.map((item) => {
+              return (
+                <ToDoElement
+                  key={item.id}
+                  text={item.text}
+                  id={item.id}
+                  profile={item.profile}
+                  onClickFavorite={() =>
+                    setToDoItems((prev) =>
+                      prev.map((elem) =>
+                        elem.id === item.id
+                          ? { ...elem, favorite: !elem.favorite }
+                          : elem
+                      )
                     )
-                  )
-                }
-                onClickEdit={() =>
-                  focus !== item.id ? editElement(item.id, item.text) : cancel()
-                }
-                onClickDelete={() => {
-                  setPopup(item.id);
-                }}
-                blockAnimation={blockAnimation}
-                focus={focus}
-                favorite={item.favorite}
-              />
-            );
-          })
+                  }
+                  onClickEdit={() =>
+                    focus !== item.id
+                      ? editElement(item.id, item.text)
+                      : cancel()
+                  }
+                  onClickDelete={() => {
+                    setPopup(item.id);
+                  }}
+                  blockAnimation={blockAnimation}
+                  focus={focus}
+                  favorite={item.favorite}
+                />
+              );
+            })
+          ) : (
+            profile != 0 &&
+            toDoItems
+              .filter(
+                (item) =>
+                  item.profile === profileData[profile].name ||
+                  item.favorite === true
+              )
+              .map((item) => {
+                return (
+                  <ToDoElement
+                    key={item.id}
+                    text={item.text}
+                    id={item.id}
+                    profile={item.profile}
+                    onClickFavorite={() =>
+                      setToDoItems((prev) =>
+                        prev.map((elem) =>
+                          elem.id === item.id
+                            ? { ...elem, favorite: !elem.favorite }
+                            : elem
+                        )
+                      )
+                    }
+                    onClickEdit={() =>
+                      focus !== item.id
+                        ? editElement(item.id, item.text)
+                        : cancel()
+                    }
+                    onClickDelete={() => {
+                      setPopup(item.id);
+                    }}
+                    blockAnimation={blockAnimation}
+                    focus={focus}
+                    favorite={item.favorite}
+                  />
+                );
+              })
+          )
         ) : (
           <motion.div className={s.emptyList} {...blockAnimation}>
             Ваш список пуст, пора что-то добавить!
