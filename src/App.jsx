@@ -21,7 +21,9 @@ const themesData = [
 ];
 
 function App() {
-  const [theme, setTheme] = useState(localStorage.getItem("theme"));
+  const [theme, setTheme] = useState(
+    localStorage.getItem("theme") ? localStorage.getItem("theme") : 0
+  );
 
   useEffect(() => {
     document.documentElement.className = "";
