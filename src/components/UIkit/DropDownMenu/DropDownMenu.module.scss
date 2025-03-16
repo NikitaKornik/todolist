@@ -1,55 +1,9 @@
-@import "../../styles/colors";
+@import "../../../styles/colors";
 
 .root {
-  background-color: var(--blueGrey-50);
-  height: 50px;
-  max-width: 1076px;
-  width: 100%;
-  position: fixed;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 3;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.container {
-  border-bottom: 1px solid var(--blueGrey-30);
-  height: 100%;
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0px 18px;
-}
-
-.leftItems {
-  display: flex;
-  gap: 10px;
-}
-
-.count {
-  color: var(--text);
-}
-
-.HeaderListItems {
-  list-style-type: none;
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 0;
-}
-
-.ListItem {
-  width: 100%;
-  background-color: var(--blueGrey-40);
-  color: var(--text);
-  padding: 0px 15px;
-}
-
-.profile {
   color: var(--text);
   position: relative;
   border: 0;
@@ -59,6 +13,13 @@
   transition: all 0.2s;
   min-width: 100px;
   font-size: 18px;
+}
+
+.listItem {
+  background-color: var(--blueGrey-40);
+  color: var(--text);
+  padding: 0px 15px;
+  width: 100%;
 }
 
 .dropdownMenu {

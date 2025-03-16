@@ -4,7 +4,7 @@
   width: 100%;
   min-height: 24px;
   padding: 15px 0px 50px 0px;
-  background-color: $blueGrey-40;
+  background-color: var(--blueGrey-40);
   border-radius: 5px;
   overflow: hidden;
   color: white;
@@ -34,6 +34,7 @@
   text-wrap: wrap;
   word-break: break-word;
   overflow-wrap: break-word;
+  color: var(--text);
 }
 
 .svgDelete {
@@ -57,7 +58,7 @@
   left: 15px;
   bottom: 10px;
   font-size: 12px;
-  color: $blueGrey-30;
+  color: var(--blueGrey-30);
 }
 
 .favorite {

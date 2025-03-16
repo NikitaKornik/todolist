@@ -2,19 +2,13 @@ import React, { useState, useRef, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { v4 as uuidv4 } from "uuid";
 
+import Header from "../Header/Header";
 import PopupDelete from "../PopupDelete/PopupDelete";
 import ToDoElement from "../ToDoElement/ToDoElement";
 import ToDoInput from "../ToDoInput/ToDoInput";
 
 import s from "./ToDoContainer.module.scss";
-import Header from "../Header/Header";
 
-// const svgAnimation = {
-//   animate: { scale: 1 },
-//   initial: { scale: 0 },
-//   exit: { scale: 0 },
-//   transition: { duration: 0.1 },
-// };
 
 const profileData = [
   {
@@ -49,7 +43,11 @@ const backGroundAnimation = {
   transition: { duration: 0.2 },
 };
 
-export default function ToDoContainer() {
+export default function ToDoContainer({
+  theme,
+  setTheme,
+  themesData,
+}) {
   const textareaRef = useRef(null);
 
   const [input, setInput] = useState("");
@@ -160,6 +158,9 @@ export default function ToDoContainer() {
         setProfile={setProfile}
         count={toDoItems.length}
         profileData={profileData}
+        theme={theme}
+        setTheme={setTheme}
+        themesData={themesData}
       />
       <AnimatePresence>
         {popup && (

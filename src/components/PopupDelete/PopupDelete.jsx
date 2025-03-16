@@ -1,9 +1,9 @@
 import React from "react";
 import { motion } from "framer-motion";
 
-import s from "./PopupDelete.module.scss";
-
 import Btn from "../UIkit/Btn/Btn";
+
+import s from "./PopupDelete.module.scss";
 
 function PopupDelete({
   deleteElement,

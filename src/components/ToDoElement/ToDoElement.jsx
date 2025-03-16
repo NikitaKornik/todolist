@@ -2,9 +2,9 @@ import React from "react";
 import { motion } from "framer-motion";
 import cn from "classnames";
 
-import s from "./ToDoElement.module.scss";
-
 import Btn from "../UIkit/Btn/Btn";
+
+import s from "./ToDoElement.module.scss";
 
 import { ReactComponent as SvgDelete } from "../../image/delete.svg";
 import { ReactComponent as SvgEdit } from "../../image/edit.svg";

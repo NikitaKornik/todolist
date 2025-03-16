@@ -14,7 +14,7 @@
 }
 
 .container {
-  background-color: $blueGrey-50;
+  background-color: var(--blueGrey-50);
   border-radius: 15px;
   width: 600px;
   height: 400px;
@@ -28,7 +28,7 @@
 
 .text {
   font-size: 30px;
-  color: $text;
+  color: var(--text);
   height: 100%;
   display: flex;
   justify-content: center;
