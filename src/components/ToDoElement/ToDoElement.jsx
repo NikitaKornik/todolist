@@ -11,6 +11,8 @@ import { ReactComponent as SvgEdit } from "../../image/edit.svg";
 import { ReactComponent as SvgCancel } from "../../image/cancel.svg";
 import { ReactComponent as SvgHeart } from "../../image/heart.svg";
 import { ReactComponent as SvgHeartFill } from "../../image/heartFill.svg";
+import { ReactComponent as SvgCheckBoxActive } from "../../image/checkBoxActive.svg";
+import { ReactComponent as SvgCheckBoxDisable } from "../../image/checkBoxDisable.svg";
 
 const ToDoElementAnimation = {
   animate: {
@@ -33,36 +35,51 @@ export default function ToDoElement({
   favorite,
   id,
   focus,
+  checked,
+  onClickCheckBox,
 }) {
   return (
     <motion.div
       className={cn(s.root, {
         [s.focus]: focus !== id && focus !== "",
         [s.favorite]: favorite,
+        [s.checked]: checked,
       })}
       id={id}
       {...ToDoElementAnimation}
     >
       <div className={s.text}>{text}</div>
       <div className={s.profile}>{profile}</div>
-      <Btn
-        variant={favorite ? "secondary" : "BGnone"}
-        svgRight={favorite ? <SvgHeartFill /> : <SvgHeart />}
-        className={cn(s.svgHeart, s.hover)}
-        onClick={onClickFavorite}
-      ></Btn>
-      <Btn
-        variant="BGnone"
-        className={cn(s.svgEdit, s.hover)}
-        onClick={onClickEdit}
-        svgRight={focus !== id ? <SvgEdit /> : <SvgCancel />}
-      ></Btn>
-      <Btn
-        variant="danger"
-        svgRight={<SvgDelete />}
-        className={cn(s.svgDelete, s.hover)}
-        onClick={onClickDelete}
-      ></Btn>
+      <div className={s.btnContainer}>
+        <Btn
+          variant={checked ? "checked" : "BGnone"}
+          size={"size_svg"}
+          svgRight={checked ? <SvgCheckBoxActive /> : <SvgCheckBoxDisable />}
+          className={s.hover}
+          onClick={onClickCheckBox}
+        ></Btn>
+        <Btn
+          variant={favorite ? "favorite" : "BGnone"}
+          size={"size_svg"}
+          svgRight={favorite ? <SvgHeartFill /> : <SvgHeart />}
+          className={s.hover}
+          onClick={onClickFavorite}
+        ></Btn>
+        <Btn
+          variant="BGnone"
+          size={"size_svg"}
+          className={s.hover}
+          onClick={onClickEdit}
+          svgRight={focus !== id ? <SvgEdit /> : <SvgCancel />}
+        ></Btn>
+        <Btn
+          variant="danger"
+          size={"size_svg"}
+          svgRight={<SvgDelete />}
+          className={s.hover}
+          onClick={onClickDelete}
+        ></Btn>
+      </div>
     </motion.div>
   );
 }

@@ -44,7 +44,12 @@
 
   &.favorite {
     background-color: #00000000;
-    color: $favorite;
+    color: var(--themeFavorite);
+  }
+
+  &.checked {
+    background-color: #00000000;
+    color: var(--themeChecked);
   }
 
   &.BGnone {
@@ -56,14 +61,23 @@
     cursor: default;
     opacity: 0.75;
   }
+
+  &.size_svg {
+    padding: 2px;
+    min-width: 25px;
+    min-height: 25px;
+    width: 30px;
+    height: 30px;
+  }
 }
 
 .svg {
-  height: 24px;
-  width: 24px;
+  width: 100%;
+  height: 100%;
 
   display: flex;
   justify-content: center;
+  align-items: center;
 
   &.LeftMargin {
     margin-right: 7px;

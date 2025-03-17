@@ -17,7 +17,7 @@ export default function Btn({
 }) {
   return (
     <motion.button
-      className={cn(s.root, s[variant], className, {
+      className={cn(s.root, s[variant], className, s[size], {
         [s.disabled]: disabled,
       })}
       onClick={onClick}

@@ -14,7 +14,7 @@
   transition: 0.2s background-color;
 
   & .hover {
-    opacity: 0.3;
+    opacity: 0.5;
     transition: 0.2s;
   }
 
@@ -37,20 +37,14 @@
   color: var(--text);
 }
 
-.svgDelete {
+.btnContainer {
   position: absolute;
-  right: 5px;
-  bottom: 5px;
-}
-.svgEdit {
-  position: absolute;
-  right: 40px;
-  bottom: 5px;
-}
-.svgHeart {
-  position: absolute;
-  right: 75px;
-  bottom: 5px;
+  right: 10px;
+  bottom: 10px;
+  display: flex;
+  justify-content: end;
+  align-items: center;
+  gap: 7px;
 }
 
 .profile {
@@ -62,5 +56,17 @@
 }
 
 .favorite {
-  background-color: $favorite;
+  background-color: var(--themeBGFavorite);
+
+  & .profile {
+    color: var(--themeFavorite);
+  }
+}
+
+.checked {
+  background-color: var(--themeBGChecked);
+
+  & .profile {
+    color: var(--themeChecked);
+  }
 }

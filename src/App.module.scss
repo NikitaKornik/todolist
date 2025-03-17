@@ -29,8 +29,11 @@ body {
   --theme-40: #{$LightTheme-40};
   --theme-50: #{$LightTheme-50};
   --theme-60: #{$LightTheme-60};
-
-  --text: #00000099;
+  --themeChecked: #{$LightChecked};
+  --themeBGChecked: #{$LightBGChecked};
+  --themeFavorite: #{$LightFavorite};
+  --themeBGFavorite: #{$LightBGFavorite};
+  --text: #{$LightText};
 }
 
 .blueTheme {
@@ -41,8 +44,11 @@ body {
   --theme-40: #{$BlueTheme-40};
   --theme-50: #{$BlueTheme-50};
   --theme-60: #{$BlueTheme-60};
-
-  --text: #ffffff99;
+  --themeChecked: #{$BlueChecked};
+  --themeBGChecked: #{$BlueBGChecked};
+  --themeFavorite: #{$BlueFavorite};
+  --themeBGFavorite: #{$BlueBGFavorite};
+  --text: #{$BlueText};
 }
 
 .darkTheme {
@@ -53,6 +59,9 @@ body {
   --theme-40: #{$DarkTheme-40};
   --theme-50: #{$DarkTheme-50};
   --theme-60: #{$DarkTheme-60};
-
-  --text: #ffffff99;
+  --themeChecked: #{$DarkChecked};
+  --themeBGChecked: #{$DarkBGChecked};
+  --themeFavorite: #{$DarkFavorite};
+  --themeBGFavorite: #{$DarkBGFavorite};
+  --text: #{$DarkText};
 }

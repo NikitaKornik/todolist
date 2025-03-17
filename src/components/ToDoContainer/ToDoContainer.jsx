@@ -9,7 +9,6 @@ import ToDoInput from "../ToDoInput/ToDoInput";
 
 import s from "./ToDoContainer.module.scss";
 
-
 const profileData = [
   {
     name: "all",
@@ -43,11 +42,7 @@ const backGroundAnimation = {
   transition: { duration: 0.2 },
 };
 
-export default function ToDoContainer({
-  theme,
-  setTheme,
-  themesData,
-}) {
+export default function ToDoContainer({ theme, setTheme, themesData }) {
   const textareaRef = useRef(null);
 
   const [input, setInput] = useState("");
@@ -106,6 +101,7 @@ export default function ToDoContainer({
             id: uuidv4(),
             text: input,
             favorite: false,
+            checked: false,
             profile: profileData[profile].name,
           },
         ]);
@@ -202,6 +198,15 @@ export default function ToDoContainer({
                       )
                     )
                   }
+                  onClickCheckBox={() =>
+                    setToDoItems((prev) =>
+                      prev.map((elem) =>
+                        elem.id === item.id
+                          ? { ...elem, checked: !elem.checked }
+                          : elem
+                      )
+                    )
+                  }
                   onClickEdit={() =>
                     focus !== item.id
                       ? editElement(item.id, item.text)
@@ -213,6 +218,7 @@ export default function ToDoContainer({
                   blockAnimation={blockAnimation}
                   focus={focus}
                   favorite={item.favorite}
+                  checked={item.checked}
                 />
               );
             })
@@ -240,6 +246,15 @@ export default function ToDoContainer({
                         )
                       )
                     }
+                    onClickCheckBox={() =>
+                      setToDoItems((prev) =>
+                        prev.map((elem) =>
+                          elem.id === item.id
+                            ? { ...elem, checked: !elem.checked }
+                            : elem
+                        )
+                      )
+                    }
                     onClickEdit={() =>
                       focus !== item.id
                         ? editElement(item.id, item.text)
@@ -251,6 +266,7 @@ export default function ToDoContainer({
                     blockAnimation={blockAnimation}
                     focus={focus}
                     favorite={item.favorite}
+                    checked={item.checked}
                   />
                 );
               })
