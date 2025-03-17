@@ -92,7 +92,6 @@ export default function ToDoContainer({ theme, setTheme, themesData }) {
   }, [popup, focus, input]);
 
   function addItem() {
-    console.log(toDoItems);
     if (focus === "") {
       if (input.trim()) {
         setToDoItems((prev) => [

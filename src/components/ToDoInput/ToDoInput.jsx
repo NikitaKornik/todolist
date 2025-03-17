@@ -57,7 +57,7 @@ function ToDoInput({
               className={s.svgCancel}
               variant={"BGdanger"}
               onClick={cancel}
-            />
+            ></Btn>
           )}
         </AnimatePresence>
       </div>
