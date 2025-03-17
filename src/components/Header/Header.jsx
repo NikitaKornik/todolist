@@ -21,6 +21,7 @@ function Header({
             data={profileData}
             item={profile}
             setItem={setProfile}
+            editable
           />
           <DropDownMenu data={themesData} item={theme} setItem={setTheme} />
         </div>

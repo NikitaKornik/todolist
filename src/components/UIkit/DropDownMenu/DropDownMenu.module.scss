@@ -8,7 +8,6 @@
   position: relative;
   border: 0;
   height: 100%;
-  background-color: var(--blueGrey-50);
   cursor: pointer;
   transition: all 0.2s;
   min-width: 100px;
@@ -16,7 +15,7 @@
 }
 
 .listItem {
-  background-color: var(--blueGrey-40);
+  background-color: var(--theme-40);
   color: var(--text);
   padding: 0px 15px;
   width: 100%;
@@ -28,7 +27,7 @@
   top: 50px;
   left: 0;
   width: 100%;
-  background-color: var(--blueGrey-60);
+  background-color: var(--theme-60);
   list-style-type: none;
   display: flex;
   justify-content: center;
@@ -39,7 +38,7 @@
   font-size: 14px;
 
   & li {
-    background-color: var(--blueGrey-60);
+    background-color: var(--theme-60);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -47,15 +46,18 @@
     transition: all 0.2s;
     width: 100%;
     cursor: pointer;
-    border-bottom: 1px solid var(--blueGrey-60);
+    border-bottom: 1px solid var(--theme-60);
 
     &:last-child {
       border-bottom: none;
-      color: $secondary;
     }
 
     &:hover {
       filter: brightness(1.3);
     }
   }
+}
+
+.editable {
+  color: $secondary;
 }

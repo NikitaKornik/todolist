@@ -1,7 +1,11 @@
 @import "./styles/colors";
 
+* {
+  transition: background-color 0.5s;
+}
+
 body {
-  background-color: var(--blueGrey-50);
+  background-color: var(--theme-50);
   font-family: Arial, Helvetica, sans-serif;
 }
 
@@ -13,41 +17,42 @@ body {
 }
 
 .back {
-  background-color: var(--blueGrey-20);
-  border: 1px solid var(--blueGrey-30);
+  background-color: var(--theme-20);
+  border: 1px solid var(--theme-30);
 }
 
 .lightTheme {
-  --blueGrey-05: #393939;
-  --blueGrey-10: #5c5c5c;
-  --blueGrey-20: #747474;
-  --blueGrey-30: #8f8f8f;
-  --blueGrey-40: #c4c4c4;
-  --blueGrey-50: #e4e4e4;
-  --blueGrey-60: #e0e0e0;
+  --theme-05: #{$LightTheme-05};
+  --theme-10: #{$LightTheme-10};
+  --theme-20: #{$LightTheme-20};
+  --theme-30: #{$LightTheme-30};
+  --theme-40: #{$LightTheme-40};
+  --theme-50: #{$LightTheme-50};
+  --theme-60: #{$LightTheme-60};
 
   --text: #00000099;
 }
 
 .blueTheme {
-  --blueGrey-05: #c8cbed;
-  --blueGrey-10: #626699;
-  --blueGrey-20: #515480;
-  --blueGrey-30: #3d3f60;
-  --blueGrey-40: #27283e;
-  --blueGrey-50: #181927;
-  --blueGrey-60: #0c0d14;
+  --theme-05: #{$BlueTheme-05};
+  --theme-10: #{$BlueTheme-10};
+  --theme-20: #{$BlueTheme-20};
+  --theme-30: #{$BlueTheme-30};
+  --theme-40: #{$BlueTheme-40};
+  --theme-50: #{$BlueTheme-50};
+  --theme-60: #{$BlueTheme-60};
 
   --text: #ffffff99;
 }
+
 .darkTheme {
-  --blueGrey-05: #e6e6e6;
-  --blueGrey-10: #939393;
-  --blueGrey-20: #747474;
-  --blueGrey-30: #595959;
-  --blueGrey-40: #343434;
-  --blueGrey-50: #232323;
-  --blueGrey-60: #1b1b1b;
+  --theme-05: #{$DarkTheme-05};
+  --theme-10: #{$DarkTheme-10};
+  --theme-20: #{$DarkTheme-20};
+  --theme-30: #{$DarkTheme-30};
+  --theme-40: #{$DarkTheme-40};
+  --theme-50: #{$DarkTheme-50};
+  --theme-60: #{$DarkTheme-60};
 
   --text: #ffffff99;
 }

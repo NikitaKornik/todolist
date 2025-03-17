@@ -14,7 +14,7 @@ const dropDownAnimation = {
   transition: { duration: 0.2 },
 };
 
-function DropDownMenu({ data, item, setItem }) {
+function DropDownMenu({ data, item, setItem, editable = false }) {
   const [onen, setOpen] = useState(false);
   const dropdownRef = useRef(null);
 
@@ -56,7 +56,7 @@ function DropDownMenu({ data, item, setItem }) {
                 </li>
               );
             })}
-            <li>Добавить +</li>
+            {editable && <li className={s.editable}>Добавить +</li>}
           </motion.ul>
         )}
       </AnimatePresence>

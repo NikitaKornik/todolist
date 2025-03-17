@@ -1,7 +1,7 @@
 @import "../../styles/colors";
 
 .root {
-  background-color: var(--blueGrey-50);
+  background-color: var(--theme-50);
   height: 50px;
   max-width: 1076px;
   width: 100%;
@@ -16,7 +16,7 @@
 }
 
 .container {
-  border-bottom: 1px solid var(--blueGrey-30);
+  border-bottom: 1px solid var(--theme-30);
   height: 100%;
   width: 100%;
   display: flex;
@@ -44,7 +44,7 @@
 
 .ListItem {
   width: 100%;
-  background-color: var(--blueGrey-40);
+  background-color: var(--theme-40);
   color: var(--text);
   padding: 0px 15px;
 }
@@ -54,7 +54,7 @@
   position: relative;
   border: 0;
   height: 100%;
-  background-color: var(--blueGrey-50);
+  background-color: var(--theme-50);
   cursor: pointer;
   transition: all 0.2s;
   min-width: 100px;
@@ -67,7 +67,7 @@
   top: 50px;
   left: 0;
   width: 100%;
-  background-color: var(--blueGrey-60);
+  background-color: var(--theme-60);
   list-style-type: none;
   display: flex;
   justify-content: center;
@@ -78,7 +78,7 @@
   font-size: 14px;
 
   & li {
-    background-color: var(--blueGrey-60);
+    background-color: var(--theme-60);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -86,7 +86,7 @@
     transition: all 0.2s;
     width: 100%;
     cursor: pointer;
-    border-bottom: 1px solid var(--blueGrey-60);
+    border-bottom: 1px solid var(--theme-60);
 
     &:last-child {
       border-bottom: none;
