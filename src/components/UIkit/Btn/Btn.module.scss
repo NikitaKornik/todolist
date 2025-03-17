@@ -63,11 +63,15 @@
   }
 
   &.size_svg {
-    padding: 2px;
-    min-width: 25px;
-    min-height: 25px;
-    width: 30px;
-    height: 30px;
+    padding: 5px;
+    min-width: 30px;
+    min-height: 30px;
+    width: 35px;
+    height: 35px;
+
+    &:hover {
+      background-color: #00000030;
+    }
   }
 }
 
