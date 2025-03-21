@@ -102,6 +102,7 @@ export default function ToDoContainer({ theme, setTheme, themesData }) {
             favorite: false,
             checked: false,
             profile: profileData[profile].name,
+            date: date,
           },
         ]);
       }
@@ -116,6 +117,13 @@ export default function ToDoContainer({ theme, setTheme, themesData }) {
     setInputCash("");
     setFocus("");
   }
+
+  function getDate() {
+    let date = new Date();
+    date = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+    return date;
+  }
+  const date = getDate();
 
   function cancel() {
     setInput(inputCash);
@@ -141,6 +149,58 @@ export default function ToDoContainer({ theme, setTheme, themesData }) {
     setInput(text);
   }
 
+  function onClickFavorite(item) {
+    setToDoItems((prev) =>
+      prev.map((elem) =>
+        elem.id === item.id ? { ...elem, favorite: !elem.favorite } : elem
+      )
+    );
+  }
+
+  function onClickCheckBox(item) {
+    setToDoItems((prev) =>
+      prev.map((elem) =>
+        elem.id === item.id ? { ...elem, checked: !elem.checked } : elem
+      )
+    );
+  }
+
+  function onClickEdit(item) {
+    focus !== item.id ? editElement(item.id, item.text) : cancel();
+  }
+
+  function onClickDelete(item) {
+    setPopup(item.id);
+  }
+
+  const filteredToDo =
+    profile === 0
+      ? toDoItems
+      : toDoItems.filter(
+          (item) =>
+            item.profile === profileData[profile].name || item.favorite === true
+        );
+
+  const renderToDo = filteredToDo
+    .toReversed()
+    .map((item) => (
+      <ToDoElement
+        key={item.id}
+        text={item.text}
+        id={item.id}
+        profile={item.profile}
+        blockAnimation={blockAnimation}
+        focus={focus}
+        favorite={item.favorite}
+        checked={item.checked}
+        date={item.date}
+        onClickFavorite={() => onClickFavorite(item)}
+        onClickCheckBox={() => onClickCheckBox(item)}
+        onClickEdit={() => onClickEdit(item)}
+        onClickDelete={() => onClickDelete(item)}
+      />
+    ));
+
   return (
     <div
       className={s.root}
@@ -151,7 +211,7 @@ export default function ToDoContainer({ theme, setTheme, themesData }) {
       <Header
         profile={profile}
         setProfile={setProfile}
-        count={toDoItems.length}
+        count={renderToDo.length}
         profileData={profileData}
         theme={theme}
         setTheme={setTheme}
@@ -179,97 +239,8 @@ export default function ToDoContainer({ theme, setTheme, themesData }) {
         setTextAreaHeight={setTextAreaHeight}
       />
       <AnimatePresence>
-        {toDoItems.length ? (
-          profile === 0 ? (
-            toDoItems.map((item) => {
-              return (
-                <ToDoElement
-                  key={item.id}
-                  text={item.text}
-                  id={item.id}
-                  profile={item.profile}
-                  onClickFavorite={() =>
-                    setToDoItems((prev) =>
-                      prev.map((elem) =>
-                        elem.id === item.id
-                          ? { ...elem, favorite: !elem.favorite }
-                          : elem
-                      )
-                    )
-                  }
-                  onClickCheckBox={() =>
-                    setToDoItems((prev) =>
-                      prev.map((elem) =>
-                        elem.id === item.id
-                          ? { ...elem, checked: !elem.checked }
-                          : elem
-                      )
-                    )
-                  }
-                  onClickEdit={() =>
-                    focus !== item.id
-                      ? editElement(item.id, item.text)
-                      : cancel()
-                  }
-                  onClickDelete={() => {
-                    setPopup(item.id);
-                  }}
-                  blockAnimation={blockAnimation}
-                  focus={focus}
-                  favorite={item.favorite}
-                  checked={item.checked}
-                />
-              );
-            })
-          ) : (
-            profile != 0 &&
-            toDoItems
-              .filter(
-                (item) =>
-                  item.profile === profileData[profile].name ||
-                  item.favorite === true
-              )
-              .map((item) => {
-                return (
-                  <ToDoElement
-                    key={item.id}
-                    text={item.text}
-                    id={item.id}
-                    profile={item.profile}
-                    onClickFavorite={() =>
-                      setToDoItems((prev) =>
-                        prev.map((elem) =>
-                          elem.id === item.id
-                            ? { ...elem, favorite: !elem.favorite }
-                            : elem
-                        )
-                      )
-                    }
-                    onClickCheckBox={() =>
-                      setToDoItems((prev) =>
-                        prev.map((elem) =>
-                          elem.id === item.id
-                            ? { ...elem, checked: !elem.checked }
-                            : elem
-                        )
-                      )
-                    }
-                    onClickEdit={() =>
-                      focus !== item.id
-                        ? editElement(item.id, item.text)
-                        : cancel()
-                    }
-                    onClickDelete={() => {
-                      setPopup(item.id);
-                    }}
-                    blockAnimation={blockAnimation}
-                    focus={focus}
-                    favorite={item.favorite}
-                    checked={item.checked}
-                  />
-                );
-              })
-          )
+        {renderToDo.length ? (
+          renderToDo
         ) : (
           <motion.div className={s.emptyList} {...blockAnimation}>
             Ваш список пуст, пора что-то добавить!

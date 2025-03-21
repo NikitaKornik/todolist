@@ -47,18 +47,22 @@
   gap: 7px;
 }
 
-.profile {
+.info {
   position: absolute;
   left: 15px;
   bottom: 10px;
   font-size: 14px;
   color: var(--theme-20);
+  display: flex;
+  justify-content: end;
+  align-items: start;
+  flex-direction: column;
 }
 
 .favorite {
   background-color: var(--themeBGFavorite);
 
-  & .profile {
+  & .info {
     color: var(--themeFavorite);
   }
 }
@@ -66,7 +70,7 @@
 .checked {
   background-color: var(--themeBGChecked);
 
-  & .profile {
+  & .info {
     color: var(--themeChecked);
   }
 }

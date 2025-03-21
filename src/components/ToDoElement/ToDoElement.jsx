@@ -37,6 +37,7 @@ export default function ToDoElement({
   focus,
   checked,
   onClickCheckBox,
+  date,
 }) {
   return (
     <motion.div
@@ -49,7 +50,14 @@ export default function ToDoElement({
       {...ToDoElementAnimation}
     >
       <div className={s.text}>{text}</div>
-      <div className={s.profile}>{profile}</div>
+      {/* <div className={s.profile}>
+        {profile ? `Профиль: ${profile}` : ""}
+        {date ? `, Дата: ${date}` : ""}
+      </div> */}
+      <div className={s.info}>
+        <div className={s.profile}>{profile && `Профиль: ${profile}`}</div>
+        <div className={s.date}>{date && `Дата: ${date}`}</div>
+      </div>
       <div className={s.btnContainer}>
         <Btn
           variant={checked ? "checked" : "BGnone"}
