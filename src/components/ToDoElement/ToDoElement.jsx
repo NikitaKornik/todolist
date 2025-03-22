@@ -1,11 +1,8 @@
 import React from "react";
 import { motion } from "framer-motion";
 import cn from "classnames";
-
 import Btn from "../UIkit/Btn/Btn";
-
 import s from "./ToDoElement.module.scss";
-
 import { ReactComponent as SvgDelete } from "../../image/delete.svg";
 import { ReactComponent as SvgEdit } from "../../image/edit.svg";
 import { ReactComponent as SvgCancel } from "../../image/cancel.svg";
@@ -50,10 +47,6 @@ export default function ToDoElement({
       {...ToDoElementAnimation}
     >
       <div className={s.text}>{text}</div>
-      {/* <div className={s.profile}>
-        {profile ? `Профиль: ${profile}` : ""}
-        {date ? `, Дата: ${date}` : ""}
-      </div> */}
       <div className={s.info}>
         <div className={s.profile}>{profile && `Профиль: ${profile}`}</div>
         <div className={s.date}>{date && `Дата: ${date}`}</div>

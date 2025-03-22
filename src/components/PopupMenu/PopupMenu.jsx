@@ -1,8 +1,7 @@
-import React from "react";
+import React, { useContext } from "react";
 import { motion } from "framer-motion";
-
+import { FunctionContext } from "../../context/ToDoProvider/ToDoProvider";
 import Btn from "../UIkit/Btn/Btn";
-
 import s from "./PopupMenu.module.scss";
 
 const blockAnimation = {
@@ -19,15 +18,8 @@ const backGroundAnimation = {
   transition: { duration: 0.2 },
 };
 
-function PopupMenu({
-  deleteElement,
-  popup,
-  setPopup,
-  title,
-  desc,
-  closeBtn,
-  children,
-}) {
+function PopupMenu({ title, desc, closeBtn, children }) {
+  const { setPopup } = useContext(FunctionContext);
   return (
     <motion.div className={s.root} {...backGroundAnimation}>
       <motion.div className={s.container} {...blockAnimation}>

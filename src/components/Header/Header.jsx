@@ -1,18 +1,12 @@
-import React from "react";
-
+import React, { useContext } from "react";
 import DropDownMenu from "../UIkit/DropDownMenu/DropDownMenu";
-
+import { FunctionContext } from "../../context/ToDoProvider/ToDoProvider";
 import s from "./Header.module.scss";
 
-function Header({
-  profile,
-  setProfile,
-  count,
-  profileData,
-  themesData,
-  theme,
-  setTheme,
-}) {
+function Header({ count }) {
+  const { profileData, profile, setProfile, theme, setTheme, themesData } =
+    useContext(FunctionContext);
+
   return (
     <div className={s.root}>
       <div className={s.container}>

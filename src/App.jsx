@@ -1,37 +1,18 @@
-import { useEffect, useState } from "react";
-import s from "./App.module.scss";
+import { useContext, useEffect } from "react";
+import { AnimatePresence } from "framer-motion";
+import { FunctionContext } from "./context/ToDoProvider/ToDoProvider";
 import ToDoContainer from "./components/ToDoContainer/ToDoContainer";
 import PopupMenu from "./components/PopupMenu/PopupMenu";
-import { AnimatePresence } from "framer-motion";
 import Btn from "./components/UIkit/Btn/Btn";
-
-const themesData = [
-  {
-    class: s.lightTheme,
-    name: "light",
-    id: 0,
-  },
-  {
-    class: s.darkTheme,
-    name: "dark",
-    id: 1,
-  },
-  {
-    class: s.blueTheme,
-    name: "blue",
-    id: 2,
-  },
-];
+import s from "./App.module.scss";
 
 function App() {
-  const [theme, setTheme] = useState(
-    localStorage.getItem("theme") ? localStorage.getItem("theme") : 0
-  );
-  const [popup, setPopup] = useState("");
+  const { popup, deleteElement, theme, themesData } =
+    useContext(FunctionContext);
 
   useEffect(() => {
     document.documentElement.className = "";
-    document.documentElement.classList.toggle(themesData[theme].class);
+    document.documentElement.classList.toggle(s[themesData[theme].class]);
     localStorage.setItem("theme", theme);
   }, [theme]);
 
@@ -42,21 +23,20 @@ function App() {
           <PopupMenu
             title={"Вы точно хотите удалить этот элемент?"}
             desc={"Удалив элемент, вы больше не можете его восстановить!"}
-            popup={popup}
-            setPopup={setPopup}
             closeBtn={true}
           >
-            <Btn variant="BGdanger">Удалить</Btn>
+            <Btn
+              variant="BGdanger"
+              onClick={() => {
+                deleteElement(popup);
+              }}
+            >
+              Удалить
+            </Btn>
           </PopupMenu>
         )}
       </AnimatePresence>
-      <ToDoContainer
-        theme={theme}
-        setTheme={setTheme}
-        themesData={themesData}
-        popup={popup}
-        setPopup={setPopup}
-      />
+      <ToDoContainer />
     </div>
   );
 }

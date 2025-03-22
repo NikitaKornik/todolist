@@ -1,24 +1,16 @@
-import React, { useEffect } from "react";
+import React, { useContext, useEffect } from "react";
 import { AnimatePresence } from "framer-motion";
-
+import { FunctionContext } from "../../context/ToDoProvider/ToDoProvider";
 import Btn from "../UIkit/Btn/Btn";
-
 import s from "./ToDoInput.module.scss";
-
 import { ReactComponent as SvgCancel } from "../../image/cancel.svg";
 import { ReactComponent as SvgCheck } from "../../image/check.svg";
 import { ReactComponent as SvgAdd } from "../../image/add.svg";
 
-function ToDoInput({
-  input,
-  setInput,
-  addItem,
-  textareaRef,
-  popup,
-  cancel,
-  focus,
-  setTextAreaHeight,
-}) {
+function ToDoInput({ textareaRef, setTextAreaHeight }) {
+  const { input, setInput, focus, popup, addItem, cancel } =
+    useContext(FunctionContext);
+
   const resizeTextarea = () => {
     const textarea = textareaRef.current;
     if (textarea) {
