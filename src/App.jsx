@@ -7,6 +7,7 @@ import Btn from "./components/UIkit/Btn/Btn";
 import s from "./App.module.scss";
 
 function App() {
+  console.log("App");
   const { popup, deleteElement, theme, themesData } =
     useContext(FunctionContext);
 

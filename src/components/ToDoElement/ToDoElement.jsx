@@ -36,6 +36,7 @@ export default function ToDoElement({
   onClickCheckBox,
   date,
 }) {
+  console.log("ToDoElement", id);
   return (
     <motion.div
       className={cn(s.root, {

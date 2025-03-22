@@ -4,6 +4,7 @@ import { FunctionContext } from "../../context/ToDoProvider/ToDoProvider";
 import s from "./Header.module.scss";
 
 function Header({ count }) {
+  console.log("Header");
   const { profileData, profile, setProfile, theme, setTheme, themesData } =
     useContext(FunctionContext);
 

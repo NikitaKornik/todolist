@@ -14,6 +14,7 @@ const blockAnimation = {
 };
 
 export default function ToDoContainer() {
+  console.log("ToDoContainer");
   const textareaRef = useRef(null);
 
   const {
@@ -101,12 +102,7 @@ export default function ToDoContainer() {
     ));
 
   return (
-    <div
-      className={s.root}
-      style={{
-        inputMaxHeight,
-      }}
-    >
+    <div className={s.root} style={inputMaxHeight}>
       <Header count={renderToDo.length} />
       <ToDoInput
         textareaRef={textareaRef}

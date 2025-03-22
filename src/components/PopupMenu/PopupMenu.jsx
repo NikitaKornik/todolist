@@ -19,6 +19,7 @@ const backGroundAnimation = {
 };
 
 function PopupMenu({ title, desc, closeBtn, children }) {
+  console.log("PopupMenu");
   const { setPopup } = useContext(FunctionContext);
   return (
     <motion.div className={s.root} {...backGroundAnimation}>

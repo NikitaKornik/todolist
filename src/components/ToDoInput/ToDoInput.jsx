@@ -8,6 +8,7 @@ import { ReactComponent as SvgCheck } from "../../image/check.svg";
 import { ReactComponent as SvgAdd } from "../../image/add.svg";
 
 function ToDoInput({ textareaRef, setTextAreaHeight }) {
+  console.log("input");
   const { input, setInput, focus, popup, addItem, cancel } =
     useContext(FunctionContext);
 
