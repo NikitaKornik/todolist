@@ -1,12 +1,15 @@
-import React, { useContext } from "react";
+import React, { memo, useContext } from "react";
 import DropDownMenu from "../UIkit/DropDownMenu/DropDownMenu";
-import { FunctionContext } from "../../context/ToDoProvider/ToDoProvider";
+import {
+  ProfileToDoContext,
+  ThemesToDoContext,
+} from "../../context/ToDoProvider/ToDoProvider";
 import s from "./Header.module.scss";
 
-function Header({ count }) {
-  console.log("Header");
-  const { profileData, profile, setProfile, theme, setTheme, themesData } =
-    useContext(FunctionContext);
+const Header = memo(({ count }) => {
+  console.log("3) Header");
+  const { setTheme, theme, themesData } = useContext(ThemesToDoContext);
+  const { profileData, profile, setProfile } = useContext(ProfileToDoContext);
 
   return (
     <div className={s.root}>
@@ -24,6 +27,6 @@ function Header({ count }) {
       </div>
     </div>
   );
-}
+});
 
-export default Header;
+export { Header };

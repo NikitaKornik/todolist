@@ -1,9 +1,22 @@
-import React, { useState, useRef, useEffect, useContext } from "react";
+import React, {
+  useState,
+  useRef,
+  useEffect,
+  useContext,
+  useCallback,
+  useMemo,
+} from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { FunctionContext } from "../../context/ToDoProvider/ToDoProvider";
-import Header from "../Header/Header";
-import ToDoElement from "../ToDoElement/ToDoElement";
-import ToDoInput from "../ToDoInput/ToDoInput";
+import {
+  InputToDoContext,
+  FunctionToDoContext,
+  ToDoContext,
+  ProfileToDoContext,
+  ElementsToDoContext,
+} from "../../context/ToDoProvider/ToDoProvider";
+import { Header } from "../Header/Header";
+import { ToDoElement } from "../ToDoElement/ToDoElement";
+import { ToDoInput } from "../ToDoInput/ToDoInput";
 import s from "./ToDoContainer.module.scss";
 
 const blockAnimation = {
@@ -14,25 +27,35 @@ const blockAnimation = {
 };
 
 export default function ToDoContainer() {
-  console.log("ToDoContainer");
+  console.log("2) ToDoContainer");
   const textareaRef = useRef(null);
 
+  const { focus, popup, toDoItems } = useContext(ToDoContext);
+  const { profileData, profile } = useContext(ProfileToDoContext);
+  const { setPopup, addItem } = useContext(FunctionToDoContext);
   const {
-    profileData,
-    input,
-    focus,
-    popup,
-    setPopup,
-    profile,
-    toDoItems,
-    addItem,
     deleteElement,
     cancel,
     onClickEdit,
     onClickDelete,
     onClickFavorite,
     onClickCheckBox,
-  } = useContext(FunctionContext);
+  } = useContext(ElementsToDoContext);
+  const { input } = useContext(InputToDoContext);
+
+  const handleFavorite = useCallback(
+    (item) => onClickFavorite(item),
+    [onClickFavorite]
+  );
+  const handleCheckBox = useCallback(
+    (item) => onClickCheckBox(item),
+    [onClickCheckBox]
+  );
+  const handleEdit = useCallback((item) => onClickEdit(item), [onClickEdit]);
+  const handleDelete = useCallback(
+    (item) => onClickDelete(item),
+    [onClickDelete]
+  );
 
   const [textAreaHeight, setTextAreaHeight] = useState([]);
 
@@ -74,16 +97,16 @@ export default function ToDoContainer() {
     };
   }, [popup, focus, input]);
 
-  const filteredToDo =
-    profile === 0
+  const filteredToDo = useMemo(() => {
+    return profile === 0
       ? toDoItems
       : toDoItems.filter(
           (item) =>
             item.profile === profileData[profile].name || item.favorite === true
         );
-  const renderToDo = filteredToDo
-    .toReversed()
-    .map((item) => (
+  }, [toDoItems, profile, profileData]);
+  const renderToDo = useMemo(() => {
+    return filteredToDo.toReversed().map((item) => (
       <ToDoElement
         key={item.id}
         text={item.text}
@@ -94,12 +117,22 @@ export default function ToDoContainer() {
         favorite={item.favorite}
         checked={item.checked}
         date={item.date}
-        onClickFavorite={() => onClickFavorite(item)}
-        onClickCheckBox={() => onClickCheckBox(item)}
-        onClickEdit={() => onClickEdit(item)}
-        onClickDelete={() => onClickDelete(item)}
+        onClickFavorite={() => handleFavorite(item)}
+        onClickCheckBox={() => handleCheckBox(item)}
+        onClickEdit={() => {
+          handleEdit(item);
+        }}
+        onClickDelete={() => handleDelete(item)}
       />
     ));
+  }, [
+    filteredToDo,
+    focus,
+    handleFavorite,
+    handleCheckBox,
+    handleEdit,
+    handleDelete,
+  ]);
 
   return (
     <div className={s.root} style={inputMaxHeight}>

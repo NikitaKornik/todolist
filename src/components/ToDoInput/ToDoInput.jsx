@@ -1,16 +1,21 @@
-import React, { useContext, useEffect } from "react";
+import React, { memo, useContext, useEffect } from "react";
 import { AnimatePresence } from "framer-motion";
-import { FunctionContext } from "../../context/ToDoProvider/ToDoProvider";
+import {
+  InputToDoContext,
+  FunctionToDoContext,
+  ToDoContext,
+} from "../../context/ToDoProvider/ToDoProvider";
 import Btn from "../UIkit/Btn/Btn";
 import s from "./ToDoInput.module.scss";
 import { ReactComponent as SvgCancel } from "../../image/cancel.svg";
 import { ReactComponent as SvgCheck } from "../../image/check.svg";
 import { ReactComponent as SvgAdd } from "../../image/add.svg";
 
-function ToDoInput({ textareaRef, setTextAreaHeight }) {
-  console.log("input");
-  const { input, setInput, focus, popup, addItem, cancel } =
-    useContext(FunctionContext);
+const ToDoInput = memo(({ textareaRef, setTextAreaHeight }) => {
+  console.log("4) input");
+  const { focus, popup } = useContext(ToDoContext);
+  const { addItem, cancel } = useContext(FunctionToDoContext);
+  const { input, setInput } = useContext(InputToDoContext);
 
   const resizeTextarea = () => {
     const textarea = textareaRef.current;
@@ -56,6 +61,6 @@ function ToDoInput({ textareaRef, setTextAreaHeight }) {
       </div>
     </div>
   );
-}
+});
 
-export default ToDoInput;
+export { ToDoInput };

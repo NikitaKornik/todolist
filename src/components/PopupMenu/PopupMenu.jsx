@@ -1,6 +1,6 @@
 import React, { useContext } from "react";
 import { motion } from "framer-motion";
-import { FunctionContext } from "../../context/ToDoProvider/ToDoProvider";
+import { FunctionToDoContext } from "../../context/ToDoProvider/ToDoProvider";
 import Btn from "../UIkit/Btn/Btn";
 import s from "./PopupMenu.module.scss";
 
@@ -19,8 +19,8 @@ const backGroundAnimation = {
 };
 
 function PopupMenu({ title, desc, closeBtn, children }) {
-  console.log("PopupMenu");
-  const { setPopup } = useContext(FunctionContext);
+  console.log("6) PopupMenu");
+  const { setPopup } = useContext(FunctionToDoContext);
   return (
     <motion.div className={s.root} {...backGroundAnimation}>
       <motion.div className={s.container} {...blockAnimation}>

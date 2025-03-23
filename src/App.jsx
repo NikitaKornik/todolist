@@ -1,15 +1,20 @@
 import { useContext, useEffect } from "react";
 import { AnimatePresence } from "framer-motion";
-import { FunctionContext } from "./context/ToDoProvider/ToDoProvider";
+import {
+  ThemesToDoContext,
+  ToDoContext,
+} from "./context/ToDoProvider/ToDoProvider";
+import { FunctionToDoContext } from "./context/ToDoProvider/ToDoProvider";
 import ToDoContainer from "./components/ToDoContainer/ToDoContainer";
 import PopupMenu from "./components/PopupMenu/PopupMenu";
 import Btn from "./components/UIkit/Btn/Btn";
 import s from "./App.module.scss";
 
 function App() {
-  console.log("App");
-  const { popup, deleteElement, theme, themesData } =
-    useContext(FunctionContext);
+  // console.log("1) App");
+  const { popup } = useContext(ToDoContext);
+  const { deleteElement } = useContext(FunctionToDoContext);
+  const { theme, themesData } = useContext(ThemesToDoContext);
 
   useEffect(() => {
     document.documentElement.className = "";
