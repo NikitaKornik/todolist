@@ -25,6 +25,11 @@ const themesData = [
     name: "blue",
     id: 2,
   },
+  {
+    class: "blackTheme",
+    name: "black",
+    id: 3,
+  },
 ];
 
 const profileData = [

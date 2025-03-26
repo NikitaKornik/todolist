@@ -14,11 +14,15 @@ export default function Btn({
   disabled,
   size,
   onClick,
+  round,
 }) {
   return (
     <motion.button
       className={cn(s.root, s[variant], className, s[size], {
         [s.disabled]: disabled,
+        [s.size40]: size === "size40",
+        [s.size36]: size === "size36",
+        [s.round]: round,
       })}
       onClick={onClick}
       whileHover={

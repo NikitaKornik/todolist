@@ -37,6 +37,41 @@
   color: var(--text);
 }
 
+.todoText {
+  margin: none;
+}
+.todoTitle {
+}
+.todoLink {
+  color: var(--link);
+}
+
+p:has(img) {
+  width: 200px;
+  max-height: 300px;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 30px;
+  margin: 15px !important;
+}
+
+.todoImg {
+  width: auto;
+  width: 100%;
+  transition: 0.5s transform;
+
+  &:hover {
+    transform: scale(1.03);
+  }
+}
+.todoBlockquote {
+  opacity: 0.6;
+  font-style: italic;
+  padding: 5px 15px;
+}
+
 .btnContainer {
   position: absolute;
   right: 10px;
@@ -44,7 +79,7 @@
   display: flex;
   justify-content: end;
   align-items: center;
-  gap: 7px;
+  gap: 5px;
 }
 
 .info {

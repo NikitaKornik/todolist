@@ -1,4 +1,5 @@
 import React, { memo } from "react";
+import ReactMarkdown from "react-markdown";
 import { motion } from "framer-motion";
 import cn from "classnames";
 import Btn from "../UIkit/Btn/Btn";
@@ -21,6 +22,24 @@ const ToDoElementAnimation = {
   initial: { height: 0, minHeight: 0, padding: 0, margin: 0 },
   exit: { height: 0, minHeight: 0, padding: 0, margin: 0 },
   transition: { duration: 0.2 },
+};
+
+const ReactMarkdownComponents = {
+  p: ({ node, ...props }) => (
+    <p className={s.todoText} {...props} style={{ margin: 0 }} />
+  ),
+  h1: ({ node, ...props }) => (
+    <h1 className={s.todoTitle} {...props} style={{ margin: 0 }} />
+  ),
+  a: ({ node, ...props }) => (
+    <a className={s.todoLink} {...props} style={{ margin: 0 }} />
+  ),
+  img: ({ node, ...props }) => (
+    <img className={s.todoImg} {...props} style={{ margin: 0 }} />
+  ),
+  blockquote: ({ node, ...props }) => (
+    <blockquote className={s.todoBlockquote} {...props} style={{ margin: 0 }} />
+  ),
 };
 
 const ToDoElement = memo(
@@ -48,7 +67,11 @@ const ToDoElement = memo(
         id={id}
         {...ToDoElementAnimation}
       >
-        <div className={s.text}>{text}</div>
+        <div className={s.text}>
+          <ReactMarkdown components={ReactMarkdownComponents}>
+            {text}
+          </ReactMarkdown>
+        </div>
         <div className={s.info}>
           <div className={s.profile}>{profile && `Профиль: ${profile}`}</div>
           <div className={s.date}>{date && `Дата: ${date}`}</div>

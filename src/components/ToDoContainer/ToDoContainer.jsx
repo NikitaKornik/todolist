@@ -62,7 +62,7 @@ export default function ToDoContainer() {
   const [textAreaHeight, setTextAreaHeight] = useState([]);
 
   const inputMaxHeight = {
-    paddingBottom: textAreaHeight <= 350 ? `${textAreaHeight}px` : "370px",
+    paddingBottom: textAreaHeight <= 400 ? `${textAreaHeight}px` : "420px",
   };
 
   useEffect(() => {

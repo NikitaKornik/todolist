@@ -4,6 +4,7 @@ import {
   InputToDoContext,
   FunctionToDoContext,
   ToDoContext,
+  ElementsToDoContext,
 } from "../../context/ToDoProvider/ToDoProvider";
 import Btn from "../UIkit/Btn/Btn";
 import s from "./ToDoInput.module.scss";
@@ -14,7 +15,8 @@ import { ReactComponent as SvgAdd } from "../../image/add.svg";
 const ToDoInput = memo(({ textareaRef, setTextAreaHeight }) => {
   console.log("4) input");
   const { focus, popup } = useContext(ToDoContext);
-  const { addItem, cancel } = useContext(FunctionToDoContext);
+  const { addItem } = useContext(FunctionToDoContext);
+  const { cancel } = useContext(ElementsToDoContext);
   const { input, setInput } = useContext(InputToDoContext);
 
   const resizeTextarea = () => {
@@ -23,7 +25,7 @@ const ToDoInput = memo(({ textareaRef, setTextAreaHeight }) => {
       textarea.style.height = "auto";
       textarea.style.height = `${textarea.scrollHeight}px`;
     }
-    setTextAreaHeight(textarea.scrollHeight + 50);
+    setTextAreaHeight(textarea.scrollHeight + 100);
   };
 
   useEffect(() => {
@@ -41,23 +43,28 @@ const ToDoInput = memo(({ textareaRef, setTextAreaHeight }) => {
           rows={1}
           placeholder="Введите текст..."
         />
-        <Btn
-          className={s.svgAdd}
-          variant={"BGprimary"}
-          onClick={addItem}
-          disabled={!input}
-          svgRight={focus !== "" ? <SvgCheck /> : <SvgAdd />}
-        ></Btn>
-        <AnimatePresence>
-          {focus !== "" && popup !== true && (
+        <div className={s.inputBottom}>
+          <div className={s.Btns}>
+            <AnimatePresence>
+              {focus !== "" && popup !== true && (
+                <Btn
+                  size={"size36"}
+                  round={true}
+                  svgRight={<SvgCancel />}
+                  variant={"BGdanger"}
+                  onClick={cancel}
+                ></Btn>
+              )}
+            </AnimatePresence>
             <Btn
-              svgRight={<SvgCancel />}
-              className={s.svgCancel}
-              variant={"BGdanger"}
-              onClick={cancel}
+              size={"size36"}
+              round={true}
+              onClick={addItem}
+              disabled={!input}
+              svgRight={focus !== "" ? <SvgCheck /> : <SvgAdd />}
             ></Btn>
-          )}
-        </AnimatePresence>
+          </div>
+        </div>
       </div>
     </div>
   );
