@@ -6,6 +6,7 @@ import React, {
   useCallback,
   useMemo,
 } from "react";
+import cn from "classnames";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   InputToDoContext,
@@ -30,11 +31,12 @@ export default function ToDoContainer() {
   console.log("2) ToDoContainer");
   const textareaRef = useRef(null);
 
+  const [columnItems, setColumnItems] = useState(false);
+
   const { focus, popup, toDoItems } = useContext(ToDoContext);
   const { profileData, profile } = useContext(ProfileToDoContext);
-  const { setPopup, addItem } = useContext(FunctionToDoContext);
+  const { setPopup, addItem, deleteElement } = useContext(FunctionToDoContext);
   const {
-    deleteElement,
     cancel,
     onClickEdit,
     onClickDelete,
@@ -136,20 +138,26 @@ export default function ToDoContainer() {
 
   return (
     <div className={s.root} style={inputMaxHeight}>
-      <Header count={renderToDo.length} />
+      <Header
+        count={renderToDo.length}
+        columnItems={columnItems}
+        setColumnItems={setColumnItems}
+      />
+      <div className={cn(s.toDoElements, { [s.columnItems]: columnItems })}>
+        <AnimatePresence>
+          {renderToDo.length ? (
+            renderToDo
+          ) : (
+            <motion.div className={s.emptyList} {...blockAnimation}>
+              Ваш список пуст, пора что-то добавить!
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
       <ToDoInput
         textareaRef={textareaRef}
         setTextAreaHeight={setTextAreaHeight}
       />
-      <AnimatePresence>
-        {renderToDo.length ? (
-          renderToDo
-        ) : (
-          <motion.div className={s.emptyList} {...blockAnimation}>
-            Ваш список пуст, пора что-то добавить!
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 }

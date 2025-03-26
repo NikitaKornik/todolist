@@ -30,6 +30,13 @@
   gap: 10px;
 }
 
+.rightItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: end;
+}
+
 .count {
   color: var(--text);
 }

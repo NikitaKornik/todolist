@@ -1,4 +1,4 @@
-import React, { memo, useContext } from "react";
+import React, { memo } from "react";
 import { motion } from "framer-motion";
 import cn from "classnames";
 import Btn from "../UIkit/Btn/Btn";
@@ -10,7 +10,6 @@ import { ReactComponent as SvgHeart } from "../../image/heart.svg";
 import { ReactComponent as SvgHeartFill } from "../../image/heartFill.svg";
 import { ReactComponent as SvgCheckBoxActive } from "../../image/checkBoxActive.svg";
 import { ReactComponent as SvgCheckBoxDisable } from "../../image/checkBoxDisable.svg";
-import { InputToDoContext } from "../../context/ToDoProvider/ToDoProvider";
 
 const ToDoElementAnimation = {
   animate: {
