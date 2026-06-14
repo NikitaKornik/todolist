@@ -61,3 +61,38 @@
 .editable {
   color: $secondary;
 }
+
+.popupAddProfile {
+  width: 100%;
+}
+
+.popupTitle {
+  margin-bottom: 50px;
+  font-size: 30px;
+  color: var(--text);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  margin: 0;
+}
+
+.popupInput {
+  background-color: var(--theme-30);
+  border: none;
+  width: 220px;
+  height: 35px;
+  margin: 70px 0px;
+  border-radius: 7px;
+  color: var(--text);
+  padding: 3px 15px;
+}
+
+.popupBtns {
+  display: flex;
+  justify-content: space-around;
+  // position: absolute;
+  // align-items: end;
+  width: 100%;
+  // bottom: 0;
+}

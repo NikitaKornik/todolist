@@ -19,6 +19,7 @@ import { Header } from "../Header/Header";
 import { ToDoElement } from "../ToDoElement/ToDoElement";
 import { ToDoInput } from "../ToDoInput/ToDoInput";
 import s from "./ToDoContainer.module.scss";
+import Btn from "../UIkit/Btn/Btn";
 
 const blockAnimation = {
   animate: { scale: 1 },
@@ -55,7 +56,38 @@ export default function ToDoContainer() {
   );
   const handleEdit = useCallback((item) => onClickEdit(item), [onClickEdit]);
   const handleDelete = useCallback(
-    (item) => onClickDelete(item),
+    (item) =>
+      onClickDelete({
+        open: true,
+        body: (
+          <>
+            <h3 className={s.popupTitle}>
+              Вы точно хотите удалить этот элемент?
+            </h3>
+            <div className={s.popupDesc}>
+              Удалив элемент, вы больше не можете его восстановить!
+            </div>
+            <div className={s.popupBtns}>
+              <Btn
+                variant="BGdanger"
+                onClick={() => {
+                  deleteElement(item.id);
+                }}
+              >
+                Удалить
+              </Btn>
+              <Btn
+                variant="BGprimary"
+                onClick={() => {
+                  setPopup("");
+                }}
+              >
+                Отмена
+              </Btn>
+            </div>
+          </>
+        ),
+      }),
     [onClickDelete]
   );
 

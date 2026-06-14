@@ -33,3 +33,33 @@
   top: 100px;
   width: 100%;
 }
+
+.popupTitle {
+  margin-bottom: 50px;
+  font-size: 30px;
+  margin: 0;
+  color: var(--text);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.popupDesc {
+  font-size: 18px;
+  color: var(--text);
+  margin: 65px 0px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.popupBtns {
+  display: flex;
+  justify-content: space-around;
+  // position: absolute;
+  // align-items: end;
+  width: 100%;
+  bottom: 0;
+}

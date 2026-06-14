@@ -11,9 +11,7 @@ import Btn from "./components/UIkit/Btn/Btn";
 import s from "./App.module.scss";
 
 function App() {
-  // console.log("1) App");
   const { popup } = useContext(ToDoContext);
-  const { deleteElement } = useContext(FunctionToDoContext);
   const { theme, themesData } = useContext(ThemesToDoContext);
 
   useEffect(() => {
@@ -26,19 +24,8 @@ function App() {
     <div className={s.root}>
       <AnimatePresence>
         {popup && (
-          <PopupMenu
-            title={"Вы точно хотите удалить этот элемент?"}
-            desc={"Удалив элемент, вы больше не можете его восстановить!"}
-            closeBtn={true}
-          >
-            <Btn
-              variant="BGdanger"
-              onClick={() => {
-                deleteElement(popup);
-              }}
-            >
-              Удалить
-            </Btn>
+          <PopupMenu title={popup.title} desc={popup.desc}>
+            {popup.body}
           </PopupMenu>
         )}
       </AnimatePresence>

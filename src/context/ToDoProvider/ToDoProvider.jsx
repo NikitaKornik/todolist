@@ -58,6 +58,11 @@ function ToDoProvider({ children }) {
   const [popup, setPopup] = useState("");
   const [profile, setProfile] = useState(0);
 
+  const [profiles, setProfiles] = useState(() => {
+    const savedProfiles = localStorage.getItem("Profiles");
+    return savedProfiles ? JSON.parse(savedProfiles) : [];
+  });
+
   const [toDoItems, setToDoItems] = useState(() => {
     const savedItems = localStorage.getItem("toDoItems");
     return savedItems ? JSON.parse(savedItems) : [];
@@ -73,6 +78,18 @@ function ToDoProvider({ children }) {
     return date;
   }
   const date = getDate();
+
+  // const addProfile = useCallback(() => {
+  //     if (input.trim()) {
+  //       setProfiles((prev) => [
+  //         ...prev,
+  //         {
+  //           name: input,
+  //           id: ,
+  //         },
+  //       ]);
+  //     }
+  //   })
 
   const addItem = useCallback(() => {
     if (focus === "") {
@@ -140,7 +157,7 @@ function ToDoProvider({ children }) {
   );
 
   const onClickDelete = useCallback((item) => {
-    setPopup(item.id);
+    setPopup(item);
   }, []);
 
   const onClickFavorite = useCallback((item) => {

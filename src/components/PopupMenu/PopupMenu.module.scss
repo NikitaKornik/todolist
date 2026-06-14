@@ -13,45 +13,21 @@
   align-items: center;
 }
 
-.container {
+.popup {
   background-color: var(--theme-50);
   border-radius: 15px;
   width: 500px;
-  min-height: 300px;
-  padding: 50px;
-  display: flex;
-  justify-content: start;
-  align-items: center;
-  flex-direction: column;
-  overflow: hidden;
+  min-height: 400px;
   position: relative;
 }
 
-.title {
-  margin-bottom: 50px;
-  font-size: 30px;
-  color: var(--text);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-}
-
-.desc {
-  font-size: 18px;
-  color: var(--text);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-}
-
-.btnContainer {
-  display: flex;
-  justify-content: space-evenly;
-  align-items: center;
+.container {
   position: absolute;
-  bottom: 20px;
-  height: 60px;
-  width: 100%;
+  top: 50px;
+  right: 50px;
+  bottom: 50px;
+  left: 50px;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
 }

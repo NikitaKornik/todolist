@@ -1,7 +1,5 @@
-import React, { useContext } from "react";
+import React from "react";
 import { motion } from "framer-motion";
-import { FunctionToDoContext } from "../../context/ToDoProvider/ToDoProvider";
-import Btn from "../UIkit/Btn/Btn";
 import s from "./PopupMenu.module.scss";
 
 const blockAnimation = {
@@ -18,29 +16,14 @@ const backGroundAnimation = {
   transition: { duration: 0.2 },
 };
 
-function PopupMenu({ title, desc, closeBtn, children }) {
-  console.log("6) PopupMenu");
-  const { setPopup } = useContext(FunctionToDoContext);
+function PopupMenu({ children }) {
+  // console.log("6) PopupMenu");
+  // const { setPopup } = useContext(FunctionToDoContext);
   return (
     <motion.div className={s.root} {...backGroundAnimation}>
-      <motion.div className={s.container} {...blockAnimation}>
-        {title && <h3 className={s.title}>{title}</h3>}
-        {desc && <div className={s.desc}>{desc}</div>}
-        <div className={s.btnContainer}>
-          {closeBtn && (
-            <Btn
-              variant="BGprimary"
-              onClick={() => {
-                setPopup("");
-              }}
-            >
-              Отмена
-            </Btn>
-          )}
-          {children}
-          {/* <Btn variant="BGdanger" onClick={() => deleteElement(popup)}>
-            Удалить
-          </Btn> */}
+      <motion.div className={s.popup} {...blockAnimation}>
+        <div className={s.container}>
+          <div className={s.body}>{children}</div>
         </div>
       </motion.div>
     </motion.div>
