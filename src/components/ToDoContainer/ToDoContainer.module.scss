@@ -8,12 +8,18 @@
 }
 
 .toDoElements {
-  display: grid;
-  column-gap: 12px;
-  row-gap: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
 
   &.columnItems {
+    display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 12px;
+    row-gap: 12px;
 
     &:has(> *:nth-child(odd):last-child) {
       & > *:last-child {

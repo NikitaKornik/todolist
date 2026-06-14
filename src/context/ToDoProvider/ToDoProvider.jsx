@@ -242,6 +242,35 @@ function ToDoProvider({ children }) {
     });
   }, [focus, inputCache]);
 
+  const reorderToDoItems = useCallback((visibleOrderedIds) => {
+    setToDoItems((prev) => {
+      if (!visibleOrderedIds.length) {
+        return prev;
+      }
+
+      const itemsById = new Map(prev.map((item) => [item.id, item]));
+      const orderedItems = [...visibleOrderedIds]
+        .reverse()
+        .map((id) => itemsById.get(id))
+        .filter(Boolean);
+
+      if (orderedItems.length !== visibleOrderedIds.length) {
+        return prev;
+      }
+
+      if (orderedItems.length === prev.length) {
+        return orderedItems;
+      }
+
+      const orderedQueue = [...orderedItems];
+      const visibleIdSet = new Set(visibleOrderedIds);
+
+      return prev.map((item) =>
+        visibleIdSet.has(item.id) ? orderedQueue.shift() : item
+      );
+    });
+  }, []);
+
   const editElement = useCallback(
     (idItem, text) => {
       setFocus(idItem);
@@ -310,6 +339,7 @@ function ToDoProvider({ children }) {
       addItem,
       deleteElement,
       deleteCompletedItems,
+      reorderToDoItems,
       addProfile,
     }),
     [
@@ -319,6 +349,7 @@ function ToDoProvider({ children }) {
       addItem,
       deleteElement,
       deleteCompletedItems,
+      reorderToDoItems,
       addProfile,
     ]
   );

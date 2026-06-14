@@ -22,6 +22,11 @@ const ToDoElementAnimation = {
   transition: { duration: 0.32, ease: [0.22, 1, 0.36, 1] },
 };
 
+const ToDoElementLayoutTransition = {
+  duration: 0.2,
+  ease: [0.22, 1, 0.36, 1],
+};
+
 function escapeRegExp(value) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
@@ -62,28 +67,28 @@ function highlightChildren(children, searchMatch) {
 function getReactMarkdownComponents(searchMatch) {
   return {
     p: ({ node, children, ...props }) => (
-    <p className={s.todoText} {...props} style={{ margin: 0 }}>
-      {highlightChildren(children, searchMatch)}
-    </p>
-  ),
-  h1: ({ node, children, ...props }) => (
-    <h1 className={s.todoTitle} {...props} style={{ margin: 0 }}>
-      {highlightChildren(children, searchMatch)}
-    </h1>
-  ),
-  a: ({ node, children, ...props }) => (
-    <a className={s.todoLink} {...props} style={{ margin: 0 }}>
-      {highlightChildren(children, searchMatch)}
-    </a>
-  ),
-  img: ({ node, ...props }) => (
-    <img alt="" className={s.todoImg} {...props} style={{ margin: 0 }} />
-  ),
-  blockquote: ({ node, children, ...props }) => (
-    <blockquote className={s.todoBlockquote} {...props} style={{ margin: 0 }}>
-      {highlightChildren(children, searchMatch)}
-    </blockquote>
-  ),
+      <p className={s.todoText} {...props} style={{ margin: 0 }}>
+        {highlightChildren(children, searchMatch)}
+      </p>
+    ),
+    h1: ({ node, children, ...props }) => (
+      <h1 className={s.todoTitle} {...props} style={{ margin: 0 }}>
+        {highlightChildren(children, searchMatch)}
+      </h1>
+    ),
+    a: ({ node, children, ...props }) => (
+      <a className={s.todoLink} {...props} style={{ margin: 0 }}>
+        {highlightChildren(children, searchMatch)}
+      </a>
+    ),
+    img: ({ node, ...props }) => (
+      <img alt="" className={s.todoImg} {...props} style={{ margin: 0 }} />
+    ),
+    blockquote: ({ node, children, ...props }) => (
+      <blockquote className={s.todoBlockquote} {...props} style={{ margin: 0 }}>
+        {highlightChildren(children, searchMatch)}
+      </blockquote>
+    ),
   };
 }
 
@@ -101,17 +106,30 @@ const ToDoElement = memo(
     onClickCheckBox,
     date,
     searchMatch,
+    draggable,
+    isDragging,
+    onPointerDown,
   }) => {
+    const animationProps = draggable ? {} : ToDoElementAnimation;
+
     return (
       <motion.div
+        layout
+        transition={{ layout: ToDoElementLayoutTransition }}
         className={cn(s.root, {
           [s.focus]: focus !== id && focus !== "",
           [s.favorite]: favorite,
           [s.checked]: checked,
+          [s.draggable]: draggable,
+          [s.dragging]: isDragging,
         })}
+        data-drag-enabled={draggable}
+        data-drag-id={id}
         id={id}
+        onPointerDown={(event) => onPointerDown?.(id, event)}
+        onMouseDown={(event) => onPointerDown?.(id, event)}
         data-testid={`todo-item-${text}`}
-        {...ToDoElementAnimation}
+        {...animationProps}
       >
         <div className={s.card}>
           <div className={s.text}>

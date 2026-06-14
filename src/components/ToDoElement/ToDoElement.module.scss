@@ -4,6 +4,8 @@
   width: auto;
   overflow: hidden;
   margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
 .card {
@@ -34,6 +36,20 @@
 
 .root:hover .card {
   border-color: var(--theme-20);
+}
+
+.draggable {
+  cursor: grab;
+  touch-action: none;
+
+  &:active {
+    cursor: grabbing;
+  }
+}
+
+.dragging {
+  opacity: 0.52;
+  cursor: grabbing;
 }
 
 .focus {
