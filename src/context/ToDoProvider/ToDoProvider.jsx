@@ -240,7 +240,21 @@ function ToDoProvider({ children }) {
 
       return prev.filter((item) => !item.checked);
     });
+    setPopup(null);
   }, [focus, inputCache]);
+
+  const requestDeleteCompletedItems = useCallback(() => {
+    const completedCount = toDoItems.filter((item) => item.checked).length;
+
+    if (completedCount === 0) {
+      return;
+    }
+
+    setPopup({
+      type: "deleteCompleted",
+      count: completedCount,
+    });
+  }, [toDoItems]);
 
   const reorderToDoItems = useCallback((visibleOrderedIds) => {
     setToDoItems((prev) => {
@@ -306,11 +320,24 @@ function ToDoProvider({ children }) {
   }, []);
 
   const onClickCheckBox = useCallback((idItem) => {
-    setToDoItems((prev) =>
-      prev.map((elem) =>
-        elem.id === idItem ? { ...elem, checked: !elem.checked } : elem
-      )
-    );
+    setToDoItems((prev) => {
+      const targetItem = prev.find((item) => item.id === idItem);
+
+      if (!targetItem) {
+        return prev;
+      }
+
+      const updatedItem = {
+        ...targetItem,
+        checked: !targetItem.checked,
+      };
+
+      if (!updatedItem.checked) {
+        return prev.map((item) => (item.id === idItem ? updatedItem : item));
+      }
+
+      return [...prev.filter((item) => item.id !== idItem), updatedItem];
+    });
   }, []);
 
   const value = useMemo(
@@ -339,6 +366,7 @@ function ToDoProvider({ children }) {
       addItem,
       deleteElement,
       deleteCompletedItems,
+      requestDeleteCompletedItems,
       reorderToDoItems,
       addProfile,
     }),
@@ -349,6 +377,7 @@ function ToDoProvider({ children }) {
       addItem,
       deleteElement,
       deleteCompletedItems,
+      requestDeleteCompletedItems,
       reorderToDoItems,
       addProfile,
     ]

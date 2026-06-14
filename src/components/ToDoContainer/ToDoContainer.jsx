@@ -27,6 +27,34 @@ const blockAnimation = {
   transition: { duration: 0.2 },
 };
 
+function getToDoPriority(item) {
+  if (item.favorite && !item.checked) {
+    return 0;
+  }
+
+  if (item.favorite && item.checked) {
+    return 1;
+  }
+
+  return 2;
+}
+
+function sortToDoByPriority(toDoEntries) {
+  return toDoEntries
+    .map((entry, index) => ({ entry, index }))
+    .sort((first, second) => {
+      const priorityDiff =
+        getToDoPriority(first.entry.item) - getToDoPriority(second.entry.item);
+
+      if (priorityDiff !== 0) {
+        return priorityDiff;
+      }
+
+      return first.index - second.index;
+    })
+    .map(({ entry }) => entry);
+}
+
 export default function ToDoContainer() {
   const textareaRef = useRef(null);
   const listRef = useRef(null);
@@ -134,7 +162,10 @@ export default function ToDoContainer() {
       .filter(({ searchMatch }) => Boolean(searchMatch));
   }, [toDoItems, profile, profileData, searchQuery]);
 
-  const visibleToDo = useMemo(() => [...filteredToDo].reverse(), [filteredToDo]);
+  const visibleToDo = useMemo(
+    () => sortToDoByPriority([...filteredToDo].reverse()),
+    [filteredToDo]
+  );
   const visibleIds = useMemo(
     () => visibleToDo.map(({ item }) => item.id),
     [visibleToDo]
@@ -153,9 +184,9 @@ export default function ToDoContainer() {
       return visibleToDo;
     }
 
-    return orderedVisibleIds
-      .map((id) => visibleToDoById.get(id))
-      .filter(Boolean);
+    return sortToDoByPriority(
+      orderedVisibleIds.map((id) => visibleToDoById.get(id)).filter(Boolean)
+    );
   }, [orderedVisibleIds, visibleIds.length, visibleToDo, visibleToDoById]);
 
   useEffect(() => {

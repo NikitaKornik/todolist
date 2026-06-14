@@ -16,7 +16,7 @@ import Btn from "../UIkit/Btn/Btn";
 const Header = memo(
   ({ count, columnItems, searchQuery, setColumnItems, setSearchQuery }) => {
     const { toDoItems } = useContext(ToDoContext);
-    const { deleteCompletedItems } = useContext(FunctionToDoContext);
+    const { requestDeleteCompletedItems } = useContext(FunctionToDoContext);
     const { setTheme, theme, themesData } = useContext(ThemesToDoContext);
     const { profileData, profile, setProfile } = useContext(ProfileToDoContext);
     const completedCount = toDoItems.filter((item) => item.checked).length;
@@ -47,7 +47,7 @@ const Header = memo(
               svgLeft={<SvgDelete />}
               ariaLabel="Удалить выполненные"
               disabled={completedCount === 0}
-              onClick={deleteCompletedItems}
+              onClick={requestDeleteCompletedItems}
             >
               Выполненные
             </Btn>

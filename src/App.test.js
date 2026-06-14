@@ -372,7 +372,7 @@ test("deletes a task with Enter while the confirmation popup is open", () => {
   expect(screen.getByText("Заметок: 0")).toBeInTheDocument();
 });
 
-test("deletes completed tasks from the header action", () => {
+test("warns before deleting completed tasks from the header action", () => {
   renderTodoApp();
 
   const input = screen.getByLabelText("Текст заметки");
@@ -387,9 +387,128 @@ test("deletes completed tasks from the header action", () => {
   );
   userEvent.click(screen.getByRole("button", { name: "Удалить выполненные" }));
 
+  expect(screen.getByText("Удалить выполненные задачи?")).toBeInTheDocument();
+  expect(screen.getByText(/Будет удалено:/)).toHaveTextContent("Будет удалено: 1");
+  expect(screen.getByText("Готовая задача")).toBeInTheDocument();
+
+  userEvent.click(
+    screen.getByRole("button", { name: "Подтвердить удаление выполненных" })
+  );
+
   expect(screen.queryByText("Готовая задача")).not.toBeInTheDocument();
   expect(screen.getByText("Активная задача")).toBeInTheDocument();
   expect(screen.getByText("Заметок: 1")).toBeInTheDocument();
+});
+
+test("deletes completed tasks with Enter while the confirmation popup is open", () => {
+  renderTodoApp();
+
+  userEvent.type(screen.getByLabelText("Текст заметки"), "Готовая задача");
+  userEvent.click(screen.getByRole("button", { name: "Добавить заметку" }));
+
+  const completedTask = screen.getByTestId("todo-item-Готовая задача");
+  userEvent.click(
+    within(completedTask).getByRole("button", { name: "Отметить выполненным" })
+  );
+  userEvent.click(screen.getByRole("button", { name: "Удалить выполненные" }));
+  userEvent.keyboard("{Enter}");
+
+  expect(screen.queryByText("Готовая задача")).not.toBeInTheDocument();
+  expect(screen.queryByText("Удалить выполненные задачи?")).not.toBeInTheDocument();
+  expect(screen.getByText("Заметок: 0")).toBeInTheDocument();
+});
+
+test("moves a task to the top when it is marked as completed", () => {
+  renderTodoApp();
+
+  const input = screen.getByLabelText("Текст заметки");
+  userEvent.type(input, "Первая");
+  userEvent.click(screen.getByRole("button", { name: "Добавить заметку" }));
+  userEvent.type(input, "Вторая");
+  userEvent.click(screen.getByRole("button", { name: "Добавить заметку" }));
+  userEvent.type(input, "Третья");
+  userEvent.click(screen.getByRole("button", { name: "Добавить заметку" }));
+
+  expect(getRenderedTodoTexts()).toEqual(["Третья", "Вторая", "Первая"]);
+
+  const firstTask = screen.getByTestId("todo-item-Первая");
+  userEvent.click(
+    within(firstTask).getByRole("button", { name: "Отметить выполненным" })
+  );
+
+  expect(getRenderedTodoTexts()).toEqual(["Первая", "Третья", "Вторая"]);
+  expect(JSON.parse(localStorage.getItem("toDoItems")).map((item) => item.text)).toEqual([
+    "Вторая",
+    "Третья",
+    "Первая",
+  ]);
+});
+
+test("keeps favorite tasks above completed non-favorite tasks", () => {
+  renderTodoApp();
+
+  const input = screen.getByLabelText("Текст заметки");
+  userEvent.type(input, "Обычная");
+  userEvent.click(screen.getByRole("button", { name: "Добавить заметку" }));
+  userEvent.type(input, "Избранная");
+  userEvent.click(screen.getByRole("button", { name: "Добавить заметку" }));
+  userEvent.type(input, "Выполненная");
+  userEvent.click(screen.getByRole("button", { name: "Добавить заметку" }));
+
+  const favoriteTask = screen.getByTestId("todo-item-Избранная");
+  userEvent.click(
+    within(favoriteTask).getByRole("button", { name: "Добавить в избранное" })
+  );
+
+  const completedTask = screen.getByTestId("todo-item-Выполненная");
+  userEvent.click(
+    within(completedTask).getByRole("button", { name: "Отметить выполненным" })
+  );
+
+  expect(getRenderedTodoTexts()).toEqual([
+    "Избранная",
+    "Выполненная",
+    "Обычная",
+  ]);
+});
+
+test("keeps completed favorite tasks below active favorite tasks", () => {
+  renderTodoApp();
+
+  const input = screen.getByLabelText("Текст заметки");
+  userEvent.type(input, "Избранная выполненная");
+  userEvent.click(screen.getByRole("button", { name: "Добавить заметку" }));
+  userEvent.type(input, "Избранная обычная");
+  userEvent.click(screen.getByRole("button", { name: "Добавить заметку" }));
+  userEvent.type(input, "Обычная");
+  userEvent.click(screen.getByRole("button", { name: "Добавить заметку" }));
+
+  const completedFavoriteTask = screen.getByTestId(
+    "todo-item-Избранная выполненная"
+  );
+  userEvent.click(
+    within(completedFavoriteTask).getByRole("button", {
+      name: "Добавить в избранное",
+    })
+  );
+  userEvent.click(
+    within(completedFavoriteTask).getByRole("button", {
+      name: "Отметить выполненным",
+    })
+  );
+
+  const activeFavoriteTask = screen.getByTestId("todo-item-Избранная обычная");
+  userEvent.click(
+    within(activeFavoriteTask).getByRole("button", {
+      name: "Добавить в избранное",
+    })
+  );
+
+  expect(getRenderedTodoTexts()).toEqual([
+    "Избранная обычная",
+    "Избранная выполненная",
+    "Обычная",
+  ]);
 });
 
 test("adds a custom profile from the profile filter", () => {

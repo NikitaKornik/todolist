@@ -77,7 +77,8 @@ function AddProfilePopup({ initialName = "", onAddProfile, onClose, profileData 
 
 function App() {
   const { popup } = useContext(ToDoContext);
-  const { addProfile, deleteElement, setPopup } = useContext(FunctionToDoContext);
+  const { addProfile, deleteCompletedItems, deleteElement, setPopup } =
+    useContext(FunctionToDoContext);
   const { deleteProfile, profileData } = useContext(ProfileToDoContext);
   const { theme, themesData } = useContext(ThemesToDoContext);
 
@@ -107,6 +108,11 @@ function App() {
         event.preventDefault();
         deleteProfile(popup.profileId, { force: true });
       }
+
+      if (event.key === "Enter" && popup.type === "deleteCompleted") {
+        event.preventDefault();
+        deleteCompletedItems();
+      }
     }
 
     window.addEventListener("keydown", handlePopupKeyDown);
@@ -114,7 +120,7 @@ function App() {
     return () => {
       window.removeEventListener("keydown", handlePopupKeyDown);
     };
-  }, [deleteElement, deleteProfile, popup, setPopup]);
+  }, [deleteCompletedItems, deleteElement, deleteProfile, popup, setPopup]);
 
   return (
     <div className={s.root}>
@@ -174,6 +180,30 @@ function App() {
                   <Btn
                     variant="BGprimary"
                     ariaLabel="Отменить удаление категории"
+                    onClick={() => setPopup(null)}
+                  >
+                    Отмена
+                  </Btn>
+                </div>
+              </>
+            )}
+            {popup.type === "deleteCompleted" && (
+              <>
+                <h3 className={s.popupTitle}>Удалить выполненные задачи?</h3>
+                <div className={s.popupDesc}>
+                  Будет удалено: {popup.count}. Это действие нельзя отменить.
+                </div>
+                <div className={s.popupBtns}>
+                  <Btn
+                    variant="BGdanger"
+                    ariaLabel="Подтвердить удаление выполненных"
+                    onClick={deleteCompletedItems}
+                  >
+                    Удалить
+                  </Btn>
+                  <Btn
+                    variant="BGprimary"
+                    ariaLabel="Отменить удаление выполненных"
                     onClick={() => setPopup(null)}
                   >
                     Отмена
