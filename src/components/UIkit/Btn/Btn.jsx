@@ -15,9 +15,14 @@ export default function Btn({
   size,
   onClick,
   round,
+  ariaLabel,
+  type = "button",
 }) {
   return (
     <motion.button
+      type={type}
+      aria-label={ariaLabel}
+      disabled={disabled}
       className={cn(s.root, s[variant], className, s[size], {
         [s.disabled]: disabled,
         [s.size40]: size === "size40",

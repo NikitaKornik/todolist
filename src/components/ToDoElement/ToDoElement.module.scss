@@ -2,19 +2,28 @@
 
 .root {
   width: auto;
-  min-height: 24px;
-  padding: 15px 0px 50px 0px;
-  background-color: var(--theme-40);
-  border-radius: 5px;
   overflow: hidden;
-  color: white;
+  margin: 0;
+}
+
+.card {
+  min-height: 84px;
+  padding: 18px 16px 54px;
+  background-color: var(--theme-40);
+  border: 1px solid var(--theme-30);
+  border-radius: 8px;
+  overflow: hidden;
   text-align: start;
   position: relative;
-  transition: 0.2s background-color;
-  margin: 0px !important;
+  transition: 0.2s background-color, 0.2s border-color, 0.2s opacity,
+    0.2s transform;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
+  will-change: transform;
+}
 
+.root {
   & .hover {
-    opacity: 0.5;
+    opacity: 0.62;
     transition: 0.2s;
   }
 
@@ -23,38 +32,57 @@
   }
 }
 
+.root:hover .card {
+  border-color: var(--theme-20);
+}
+
 .focus {
-  opacity: 0.5;
+  opacity: 0.48;
 }
 
 .text {
   width: auto;
-  padding: 0px 15px;
+  padding: 0;
   overflow: hidden;
   text-wrap: wrap;
   word-break: break-word;
   overflow-wrap: break-word;
   color: var(--text);
+  font-size: 16px;
+  line-height: 1.55;
 }
 
 .todoText {
-  margin: none;
+  margin: 0;
 }
+
+.searchHighlight {
+  border-radius: 4px;
+  background-color: #facc15;
+  color: #1f2937;
+  padding: 0 3px;
+}
+
 .todoTitle {
+  font-size: 22px;
+  line-height: 1.2;
+  margin: 0 0 8px !important;
 }
 .todoLink {
   color: var(--link);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
 }
 
 p:has(img) {
-  width: 200px;
+  width: min(100%, 260px);
   max-height: 300px;
   overflow: hidden;
   display: flex;
   justify-content: center;
   align-items: center;
   border-radius: 30px;
-  margin: 15px !important;
+  margin: 15px 0 !important;
 }
 
 .todoImg {
@@ -69,33 +97,49 @@ p:has(img) {
 .todoBlockquote {
   opacity: 0.6;
   font-style: italic;
-  padding: 5px 15px;
+  padding: 8px 14px;
+  border-left: 3px solid var(--theme-20);
+  margin: 10px 0 !important;
 }
 
 .btnContainer {
   position: absolute;
-  right: 10px;
-  bottom: 10px;
+  right: 12px;
+  bottom: 12px;
   display: flex;
   justify-content: end;
   align-items: center;
-  gap: 5px;
+  gap: 6px;
 }
 
 .info {
   position: absolute;
-  left: 15px;
-  bottom: 10px;
+  left: 16px;
+  right: 150px;
+  bottom: 12px;
   font-size: 14px;
   color: var(--theme-20);
   display: flex;
   justify-content: end;
   align-items: start;
   flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.profile,
+.date {
+  overflow: hidden;
+  max-width: 100%;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .favorite {
-  background-color: var(--themeBGFavorite);
+  & .card {
+    background-color: var(--themeBGFavorite);
+    border-color: var(--themeFavorite);
+  }
 
   & .info {
     color: var(--themeFavorite);
@@ -103,9 +147,33 @@ p:has(img) {
 }
 
 .checked {
-  background-color: var(--themeBGChecked);
+  & .card {
+    background-color: var(--themeBGChecked);
+    border-color: var(--themeChecked);
+  }
 
   & .info {
     color: var(--themeChecked);
+  }
+
+  & .text {
+    opacity: 0.72;
+  }
+}
+
+@media (max-width: 560px) {
+  .card {
+    padding: 16px 14px 86px;
+  }
+
+  .info {
+    right: 16px;
+    bottom: 48px;
+  }
+
+  .btnContainer {
+    left: 12px;
+    right: 12px;
+    justify-content: flex-end;
   }
 }

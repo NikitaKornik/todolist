@@ -9,7 +9,6 @@ import React, {
 import cn from "classnames";
 import { AnimatePresence, motion } from "framer-motion";
 import {
-  InputToDoContext,
   FunctionToDoContext,
   ToDoContext,
   ProfileToDoContext,
@@ -19,7 +18,7 @@ import { Header } from "../Header/Header";
 import { ToDoElement } from "../ToDoElement/ToDoElement";
 import { ToDoInput } from "../ToDoInput/ToDoInput";
 import s from "./ToDoContainer.module.scss";
-import Btn from "../UIkit/Btn/Btn";
+import { findNoteSearchMatch } from "../../utils/noteSearch";
 
 const blockAnimation = {
   animate: { scale: 1 },
@@ -29,14 +28,14 @@ const blockAnimation = {
 };
 
 export default function ToDoContainer() {
-  console.log("2) ToDoContainer");
   const textareaRef = useRef(null);
 
   const [columnItems, setColumnItems] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const { focus, popup, toDoItems } = useContext(ToDoContext);
   const { profileData, profile } = useContext(ProfileToDoContext);
-  const { setPopup, addItem, deleteElement } = useContext(FunctionToDoContext);
+  const { addItem } = useContext(FunctionToDoContext);
   const {
     cancel,
     onClickEdit,
@@ -44,58 +43,30 @@ export default function ToDoContainer() {
     onClickFavorite,
     onClickCheckBox,
   } = useContext(ElementsToDoContext);
-  const { input } = useContext(InputToDoContext);
 
-  const handleFavorite = useCallback(
-    (item) => onClickFavorite(item),
-    [onClickFavorite]
+  const handleFavorite = useCallback((id) => onClickFavorite(id), [onClickFavorite]);
+  const handleCheckBox = useCallback((id) => onClickCheckBox(id), [onClickCheckBox]);
+  const handleEdit = useCallback(
+    (id, text) => onClickEdit({ id, text }),
+    [onClickEdit]
   );
-  const handleCheckBox = useCallback(
-    (item) => onClickCheckBox(item),
-    [onClickCheckBox]
-  );
-  const handleEdit = useCallback((item) => onClickEdit(item), [onClickEdit]);
   const handleDelete = useCallback(
-    (item) =>
+    (id) =>
       onClickDelete({
-        open: true,
-        body: (
-          <>
-            <h3 className={s.popupTitle}>
-              Вы точно хотите удалить этот элемент?
-            </h3>
-            <div className={s.popupDesc}>
-              Удалив элемент, вы больше не можете его восстановить!
-            </div>
-            <div className={s.popupBtns}>
-              <Btn
-                variant="BGdanger"
-                onClick={() => {
-                  deleteElement(item.id);
-                }}
-              >
-                Удалить
-              </Btn>
-              <Btn
-                variant="BGprimary"
-                onClick={() => {
-                  setPopup("");
-                }}
-              >
-                Отмена
-              </Btn>
-            </div>
-          </>
-        ),
+        type: "delete",
+        itemId: id,
       }),
     [onClickDelete]
   );
 
-  const [textAreaHeight, setTextAreaHeight] = useState([]);
+  const [textAreaHeight, setTextAreaHeight] = useState(0);
 
-  const inputMaxHeight = {
-    paddingBottom: textAreaHeight <= 400 ? `${textAreaHeight}px` : "420px",
-  };
+  const inputMaxHeight = useMemo(
+    () => ({
+      paddingBottom: textAreaHeight <= 400 ? `${textAreaHeight}px` : "420px",
+    }),
+    [textAreaHeight]
+  );
 
   useEffect(() => {
     if (toDoItems.length > 0) {
@@ -108,17 +79,12 @@ export default function ToDoContainer() {
   useEffect(() => {
     const handleKeyDown = (key) => {
       if (key.key === "Escape") {
-        if (popup) {
-          setPopup("");
-        }
-        if (focus !== "") {
+        if (!popup && focus !== "") {
           cancel();
         }
       }
       if (key.key === "Enter" && !key.shiftKey) {
-        if (popup) {
-          deleteElement(popup);
-        } else {
+        if (!popup) {
           key.preventDefault();
           addItem();
         }
@@ -129,21 +95,45 @@ export default function ToDoContainer() {
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [popup, focus, input]);
+  }, [popup, focus, cancel, addItem]);
 
   const filteredToDo = useMemo(() => {
-    return profile === 0
-      ? toDoItems
-      : toDoItems.filter(
-          (item) =>
-            item.profile === profileData[profile].name || item.favorite === true
-        );
-  }, [toDoItems, profile, profileData]);
+    const profileFilteredToDo =
+      profile === 0
+        ? toDoItems
+        : toDoItems.filter((item) => {
+            const selectedProfile = profileData.find(
+              (profileItem) => profileItem.id === profile
+            );
+
+            return (
+              item.profile === selectedProfile?.name || item.favorite === true
+            );
+          });
+
+    const trimmedSearchQuery = searchQuery.trim();
+
+    if (!trimmedSearchQuery) {
+      return profileFilteredToDo.map((item) => ({
+        item,
+        searchMatch: null,
+      }));
+    }
+
+    return profileFilteredToDo
+      .map((item) => ({
+        item,
+        searchMatch: findNoteSearchMatch(item.text, trimmedSearchQuery),
+      }))
+      .filter(({ searchMatch }) => Boolean(searchMatch));
+  }, [toDoItems, profile, profileData, searchQuery]);
+
   const renderToDo = useMemo(() => {
-    return filteredToDo.toReversed().map((item) => (
+    return [...filteredToDo].reverse().map(({ item, searchMatch }) => (
       <ToDoElement
         key={item.id}
         text={item.text}
+        searchMatch={searchMatch}
         id={item.id}
         profile={item.profile}
         blockAnimation={blockAnimation}
@@ -151,12 +141,10 @@ export default function ToDoContainer() {
         favorite={item.favorite}
         checked={item.checked}
         date={item.date}
-        onClickFavorite={() => handleFavorite(item)}
-        onClickCheckBox={() => handleCheckBox(item)}
-        onClickEdit={() => {
-          handleEdit(item);
-        }}
-        onClickDelete={() => handleDelete(item)}
+        onClickFavorite={handleFavorite}
+        onClickCheckBox={handleCheckBox}
+        onClickEdit={handleEdit}
+        onClickDelete={handleDelete}
       />
     ));
   }, [
@@ -174,6 +162,8 @@ export default function ToDoContainer() {
         count={renderToDo.length}
         columnItems={columnItems}
         setColumnItems={setColumnItems}
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
       />
       <div className={cn(s.toDoElements, { [s.columnItems]: columnItems })}>
         <AnimatePresence>
@@ -181,7 +171,9 @@ export default function ToDoContainer() {
             renderToDo
           ) : (
             <motion.div className={s.emptyList} {...blockAnimation}>
-              Ваш список пуст, пора что-то добавить!
+              {searchQuery.trim()
+                ? "Ничего не найдено"
+                : "Ваш список пуст, пора что-то добавить!"}
             </motion.div>
           )}
         </AnimatePresence>

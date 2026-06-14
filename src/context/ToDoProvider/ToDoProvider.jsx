@@ -1,5 +1,10 @@
-import React, { useCallback, useMemo } from "react";
-import { createContext, useState } from "react";
+import React, {
+  createContext,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { v4 as uuidv4 } from "uuid";
 
 export const ToDoContext = createContext(null);
@@ -8,6 +13,8 @@ export const InputToDoContext = createContext(null);
 export const ThemesToDoContext = createContext(null);
 export const ProfileToDoContext = createContext(null);
 export const ElementsToDoContext = createContext(null);
+
+const PROFILE_NAME_LIMIT = 32;
 
 const themesData = [
   {
@@ -36,31 +43,48 @@ const profileData = [
   {
     name: "all",
     id: 0,
+    createdAt: 0,
+    deletable: false,
   },
   {
     name: "home",
     id: 1,
+    createdAt: 1,
+    deletable: false,
   },
   {
     name: "work",
     id: 2,
+    createdAt: 2,
+    deletable: false,
   },
   {
     name: "study",
     id: 3,
+    createdAt: 3,
+    deletable: false,
   },
 ];
+
+function normalizeProfile(profileItem, index) {
+  return {
+    id: profileItem.id || `custom-${uuidv4()}`,
+    name: profileItem.name,
+    createdAt: profileItem.createdAt || Date.now() + index,
+    deletable: true,
+  };
+}
 
 function ToDoProvider({ children }) {
   const [input, setInput] = useState("");
   const [inputCache, setInputCache] = useState("");
   const [focus, setFocus] = useState("");
-  const [popup, setPopup] = useState("");
+  const [popup, setPopup] = useState(null);
   const [profile, setProfile] = useState(0);
 
-  const [profiles, setProfiles] = useState(() => {
+  const [customProfiles, setCustomProfiles] = useState(() => {
     const savedProfiles = localStorage.getItem("Profiles");
-    return savedProfiles ? JSON.parse(savedProfiles) : [];
+    return savedProfiles ? JSON.parse(savedProfiles).map(normalizeProfile) : [];
   });
 
   const [toDoItems, setToDoItems] = useState(() => {
@@ -68,8 +92,10 @@ function ToDoProvider({ children }) {
     return savedItems ? JSON.parse(savedItems) : [];
   });
 
-  const [theme, setTheme] = useState(
-    localStorage.getItem("theme") ? localStorage.getItem("theme") : 0
+  const [theme, setTheme] = useState(() => Number(localStorage.getItem("theme") || 0));
+  const allProfiles = useMemo(
+    () => [...profileData, ...customProfiles],
+    [customProfiles]
   );
 
   function getDate() {
@@ -77,23 +103,94 @@ function ToDoProvider({ children }) {
     date = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
     return date;
   }
-  const date = getDate();
 
-  // const addProfile = useCallback(() => {
-  //     if (input.trim()) {
-  //       setProfiles((prev) => [
-  //         ...prev,
-  //         {
-  //           name: input,
-  //           id: ,
-  //         },
-  //       ]);
-  //     }
-  //   })
+  useEffect(() => {
+    if (customProfiles.length > 0) {
+      localStorage.setItem("Profiles", JSON.stringify(customProfiles));
+    } else {
+      localStorage.removeItem("Profiles");
+    }
+  }, [customProfiles]);
+
+  const addProfile = useCallback(
+    (profileName) => {
+      const name = profileName.trim().slice(0, PROFILE_NAME_LIMIT);
+
+      if (!name) {
+        return false;
+      }
+
+      const existingProfile = allProfiles.find(
+        (item) => item.name.toLowerCase() === name.toLowerCase()
+      );
+
+      if (existingProfile) {
+        return false;
+      }
+
+      const newProfile = {
+        name,
+        id: `custom-${uuidv4()}`,
+        createdAt: Date.now(),
+        deletable: true,
+      };
+
+      setCustomProfiles((prev) => [...prev, newProfile]);
+      setProfile(newProfile.id);
+      return true;
+    },
+    [allProfiles]
+  );
+
+  const deleteProfile = useCallback(
+    (profileId, options = {}) => {
+      const profileToDelete = customProfiles.find((item) => item.id === profileId);
+
+      if (!profileToDelete) {
+        return;
+      }
+
+      const profileItems = toDoItems.filter(
+        (item) => item.profile === profileToDelete.name
+      );
+
+      if (profileItems.length > 0 && !options.force) {
+        setPopup({
+          type: "deleteProfile",
+          profileId,
+          profileName: profileToDelete.name,
+          notesCount: profileItems.length,
+        });
+        return;
+      }
+
+      setCustomProfiles((prev) => prev.filter((item) => item.id !== profileId));
+      setToDoItems((prev) =>
+        prev.filter((item) => item.profile !== profileToDelete.name)
+      );
+      setPopup(null);
+
+      if (profile === profileId) {
+        setProfile(0);
+      }
+
+      const focusedItem = toDoItems.find((item) => item.id === focus);
+
+      if (focusedItem?.profile === profileToDelete.name) {
+        setFocus("");
+        setInput(inputCache);
+        setInputCache("");
+      }
+    },
+    [customProfiles, focus, inputCache, profile, toDoItems]
+  );
 
   const addItem = useCallback(() => {
     if (focus === "") {
       if (input.trim()) {
+        const selectedProfile =
+          allProfiles.find((item) => item.id === profile) || profileData[0];
+
         setToDoItems((prev) => [
           ...prev,
           {
@@ -101,8 +198,8 @@ function ToDoProvider({ children }) {
             text: input,
             favorite: false,
             checked: false,
-            profile: profileData[profile].name,
-            date: date,
+            profile: selectedProfile.name,
+            date: getDate(),
           },
         ]);
       }
@@ -116,14 +213,12 @@ function ToDoProvider({ children }) {
     setInput(inputCache);
     setInputCache("");
     setFocus("");
-  }, [focus, input, profile]);
+  }, [allProfiles, focus, input, inputCache, profile]);
 
   const deleteElement = useCallback(
     (idItem) => {
       setToDoItems((prev) => prev.filter((item) => item.id !== idItem));
-      setTimeout(() => {
-        setPopup("");
-      }, 50);
+      setPopup(null);
       if (idItem === focus) {
         setFocus("");
         setInput(inputCache);
@@ -133,9 +228,22 @@ function ToDoProvider({ children }) {
     [focus, inputCache]
   );
 
+  const deleteCompletedItems = useCallback(() => {
+    setToDoItems((prev) => {
+      const focusedItem = prev.find((item) => item.id === focus);
+
+      if (focusedItem?.checked) {
+        setFocus("");
+        setInput(inputCache);
+        setInputCache("");
+      }
+
+      return prev.filter((item) => !item.checked);
+    });
+  }, [focus, inputCache]);
+
   const editElement = useCallback(
     (idItem, text) => {
-      console.log("input in edit:", input);
       setFocus(idItem);
       setInputCache(input);
       setInput(text);
@@ -153,25 +261,25 @@ function ToDoProvider({ children }) {
     (item) => {
       focus !== item.id ? editElement(item.id, item.text) : cancel();
     },
-    [focus]
+    [focus, editElement, cancel]
   );
 
   const onClickDelete = useCallback((item) => {
     setPopup(item);
   }, []);
 
-  const onClickFavorite = useCallback((item) => {
+  const onClickFavorite = useCallback((idItem) => {
     setToDoItems((prev) =>
       prev.map((elem) =>
-        elem.id === item.id ? { ...elem, favorite: !elem.favorite } : elem
+        elem.id === idItem ? { ...elem, favorite: !elem.favorite } : elem
       )
     );
   }, []);
 
-  const onClickCheckBox = useCallback((item) => {
+  const onClickCheckBox = useCallback((idItem) => {
     setToDoItems((prev) =>
       prev.map((elem) =>
-        elem.id === item.id ? { ...elem, checked: !elem.checked } : elem
+        elem.id === idItem ? { ...elem, checked: !elem.checked } : elem
       )
     );
   }, []);
@@ -181,7 +289,6 @@ function ToDoProvider({ children }) {
       toDoItems,
       focus,
       popup,
-      date,
     }),
     [toDoItems, focus, popup]
   );
@@ -202,8 +309,18 @@ function ToDoProvider({ children }) {
       setToDoItems,
       addItem,
       deleteElement,
+      deleteCompletedItems,
+      addProfile,
     }),
-    [setFocus, setPopup, setToDoItems, addItem, deleteElement]
+    [
+      setFocus,
+      setPopup,
+      setToDoItems,
+      addItem,
+      deleteElement,
+      deleteCompletedItems,
+      addProfile,
+    ]
   );
 
   const inputContext = useMemo(
@@ -216,21 +333,32 @@ function ToDoProvider({ children }) {
 
   const profileContext = useMemo(
     () => ({
-      profileData,
+      profileData: allProfiles,
       profile,
+      deleteProfile,
       setProfile,
     }),
-    [profileData, profile]
+    [allProfiles, deleteProfile, profile]
   );
 
-  const toDoElementContext = useMemo(() => ({
-    editElement,
-    cancel,
-    onClickEdit,
-    onClickDelete,
-    onClickFavorite,
-    onClickCheckBox,
-  }));
+  const toDoElementContext = useMemo(
+    () => ({
+      editElement,
+      cancel,
+      onClickEdit,
+      onClickDelete,
+      onClickFavorite,
+      onClickCheckBox,
+    }),
+    [
+      editElement,
+      cancel,
+      onClickEdit,
+      onClickDelete,
+      onClickFavorite,
+      onClickCheckBox,
+    ]
+  );
 
   return (
     <ToDoContext.Provider value={value}>

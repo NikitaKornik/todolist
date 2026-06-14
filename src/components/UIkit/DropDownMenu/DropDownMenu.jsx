@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useContext } from "react";
+import React, { useEffect, useMemo, useState, useRef, useContext } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 import Btn from "../Btn/Btn";
@@ -6,7 +6,10 @@ import s from "./DropDownMenu.module.scss";
 
 import { ReactComponent as ChevronDown } from "../../../image/chevronDown.svg";
 import { ReactComponent as ChevronUp } from "../../../image/chevronUp.svg";
-import { FunctionToDoContext } from "../../../context/ToDoProvider/ToDoProvider";
+import {
+  FunctionToDoContext,
+  ProfileToDoContext,
+} from "../../../context/ToDoProvider/ToDoProvider";
 
 const dropDownAnimation = {
   animate: { height: "auto" },
@@ -16,11 +19,31 @@ const dropDownAnimation = {
 };
 
 function DropDownMenu({ data, item, setItem, editable = false }) {
-  const [onen, setOpen] = useState(false);
-  const [profileInput, setProfileInput] = useState("");
+  const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState("");
+  const [sortMode, setSortMode] = useState("createdAt");
   const dropdownRef = useRef(null);
+  const selectedItem = data.find((listItem) => listItem.id === item) || data[0];
 
   const { setPopup } = useContext(FunctionToDoContext);
+  const { deleteProfile } = useContext(ProfileToDoContext);
+
+  const visibleItems = useMemo(() => {
+    const baseItems = data.filter((listItem) =>
+      listItem.name.toLowerCase().includes(search.trim().toLowerCase())
+    );
+    const defaultItems = baseItems.filter((listItem) => !listItem.deletable);
+    const customItems = baseItems.filter((listItem) => listItem.deletable);
+    const sortedCustomItems = [...customItems].sort((first, second) => {
+      if (sortMode === "name") {
+        return first.name.localeCompare(second.name);
+      }
+
+      return (second.createdAt || 0) - (first.createdAt || 0);
+    });
+
+    return editable ? [...defaultItems, ...sortedCustomItems] : baseItems;
+  }, [data, editable, search, sortMode]);
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -36,65 +59,79 @@ function DropDownMenu({ data, item, setItem, editable = false }) {
 
   function addProfile() {
     setPopup({
-      open: true,
-      body: (
-        <div className={s.popupAddProfile}>
-          <h3 className={s.popupTitle}>Добавить элемент?</h3>
-          <input
-            className={s.popupInput}
-            placeholder="Профиль"
-            onChange={(e) => {
-              setProfileInput(e.target.value);
-            }}
-          ></input>
-          <div className={s.popupBtns}>
-            <Btn
-              variant="BGsecondary"
-              onClick={() => {
-                console.log(profileInput);
-                setPopup("");
-              }}
-            >
-              Добавить
-            </Btn>
-            <Btn
-              variant="BGprimary"
-              onClick={() => {
-                setPopup("");
-              }}
-            >
-              Отмена
-            </Btn>
-          </div>
-        </div>
-      ),
+      type: "addProfile",
+      initialName: search.trim(),
     });
+    setOpen(false);
   }
 
   return (
     <div className={s.root} ref={dropdownRef}>
       <Btn
         className={s.listItem}
-        onClick={() => setOpen(!onen)}
+        ariaLabel={`Открыть список: ${selectedItem.name}`}
+        onClick={() => setOpen((prev) => !prev)}
         svgRight={
-          onen ? <ChevronUp width={"15px"} /> : <ChevronDown width={"15px"} />
+          open ? <ChevronUp width={"15px"} /> : <ChevronDown width={"15px"} />
         }
       >
-        {data[item].name}
+        {selectedItem.name}
       </Btn>
       <AnimatePresence>
-        {onen && (
+        {open && (
           <motion.ul className={s.dropdownMenu} {...dropDownAnimation}>
-            {data.map((listItem) => {
+            {editable && (
+              <li className={s.filterTools} role="presentation">
+                <input
+                  aria-label="Поиск фильтров"
+                  className={s.searchInput}
+                  value={search}
+                  onChange={(event) => setSearch(event.target.value)}
+                  onClick={(event) => event.stopPropagation()}
+                  placeholder="Поиск"
+                />
+                <button
+                  aria-label={
+                    sortMode === "createdAt"
+                      ? "Сортировать фильтры по имени"
+                      : "Сортировать фильтры по времени создания"
+                  }
+                  className={s.sortButton}
+                  type="button"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    setSortMode((prev) =>
+                      prev === "createdAt" ? "name" : "createdAt"
+                    );
+                  }}
+                >
+                  {sortMode === "createdAt" ? "по дате" : "по имени"}
+                </button>
+              </li>
+            )}
+            {visibleItems.map((listItem) => {
               return (
                 <li
                   key={listItem.id}
+                  className={s.dropdownItem}
                   onClick={() => {
                     setItem(listItem.id);
-                    setOpen(!onen);
+                    setOpen(false);
                   }}
                 >
-                  {listItem.name}
+                  <span className={s.itemName}>{listItem.name}</span>
+                  {editable && listItem.deletable && (
+                    <button
+                      aria-label={`Удалить фильтр ${listItem.name}`}
+                      className={s.deleteItem}
+                      type="button"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        deleteProfile(listItem.id);
+                      }}
+                    >
+                    </button>
+                  )}
                 </li>
               );
             })}
