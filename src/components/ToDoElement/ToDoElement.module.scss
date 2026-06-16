@@ -10,7 +10,16 @@
 
 .card {
   min-height: 84px;
-  padding: 18px 16px 54px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    "text text"
+    "deadline deadline"
+    "info buttons";
+  align-items: end;
+  column-gap: 12px;
+  row-gap: 10px;
+  padding: 18px 16px 14px;
   background-color: var(--theme-40);
   border: 1px solid var(--theme-30);
   border-radius: 8px;
@@ -40,7 +49,18 @@
 
 .draggable {
   cursor: grab;
-  touch-action: none;
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+
+  & .card,
+  & .text {
+    touch-action: pan-y;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+  }
 
   &:active {
     cursor: grabbing;
@@ -50,6 +70,7 @@
 .dragging {
   opacity: 0.52;
   cursor: grabbing;
+  touch-action: none;
 }
 
 .focus {
@@ -57,6 +78,7 @@
 }
 
 .text {
+  grid-area: text;
   width: auto;
   padding: 0;
   overflow: hidden;
@@ -119,9 +141,7 @@ p:has(img) {
 }
 
 .btnContainer {
-  position: absolute;
-  right: 12px;
-  bottom: 12px;
+  grid-area: buttons;
   display: flex;
   justify-content: end;
   align-items: center;
@@ -129,10 +149,7 @@ p:has(img) {
 }
 
 .info {
-  position: absolute;
-  left: 16px;
-  right: 150px;
-  bottom: 12px;
+  grid-area: info;
   font-size: 14px;
   color: var(--theme-20);
   display: flex;
@@ -143,7 +160,27 @@ p:has(img) {
   min-width: 0;
 }
 
-.profile,
+.deadline {
+  grid-area: deadline;
+  display: inline-block;
+  justify-self: start;
+  width: fit-content;
+  max-width: 100%;
+  margin-top: 10px;
+  padding: 4px 8px;
+  border: 1px solid rgba(192, 42, 42, 0.42);
+  border-radius: 6px;
+  color: $danger;
+  background-color: rgba(192, 42, 42, 0.08);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.category,
 .date {
   overflow: hidden;
   max-width: 100%;
@@ -179,17 +216,57 @@ p:has(img) {
 
 @media (max-width: 560px) {
   .card {
-    padding: 16px 14px 86px;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "text text"
+      "deadline deadline"
+      "info buttons";
+    column-gap: 10px;
+    row-gap: 8px;
+    padding: 16px 14px 14px;
   }
 
   .info {
-    right: 16px;
-    bottom: 48px;
+    min-width: 0;
   }
 
   .btnContainer {
-    left: 12px;
-    right: 12px;
     justify-content: flex-end;
+    gap: 4px;
+  }
+}
+
+@media (pointer: coarse) {
+  .root {
+    & .hover {
+      opacity: 0.62;
+    }
+
+    &:hover .hover {
+      opacity: 0.62;
+    }
+  }
+
+  .root:hover .card {
+    border-color: var(--theme-30);
+  }
+
+  .favorite:hover .card {
+    border-color: var(--themeFavorite);
+  }
+
+  .checked:hover .card {
+    border-color: var(--themeChecked);
+  }
+
+  .todoImg:hover {
+    transform: none;
+  }
+
+  .draggable {
+    & .text,
+    & .text * {
+      pointer-events: none;
+    }
   }
 }

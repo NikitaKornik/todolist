@@ -10,20 +10,33 @@ export default function Btn({
   children,
   svgLeft,
   svgRight,
-  submit,
   disabled,
   size,
   onClick,
   round,
   ariaLabel,
+  active = false,
+  animate = true,
+  collapseLabelOnMobile = false,
+  tone,
   type = "button",
 }) {
+  const motionProps = animate
+    ? {
+        animate: { scale: 1 },
+        initial: { scale: 0 },
+        exit: { scale: 0 },
+      }
+    : {};
+
   return (
     <motion.button
       type={type}
       aria-label={ariaLabel}
       disabled={disabled}
-      className={cn(s.root, s[variant], className, s[size], {
+      className={cn(s.root, s[variant], className, s[size], s[tone], {
+        [s.active]: active,
+        [s.collapseLabelOnMobile]: collapseLabelOnMobile,
         [s.disabled]: disabled,
         [s.size40]: size === "size40",
         [s.size36]: size === "size36",
@@ -40,9 +53,7 @@ export default function Btn({
           scale: 0.95,
         }
       }
-      animate={{ scale: 1 }}
-      initial={{ scale: 0 }}
-      exit={{ scale: 0 }}
+      {...motionProps}
     >
       {svgLeft && (
         <div
@@ -53,7 +64,7 @@ export default function Btn({
           {svgLeft}
         </div>
       )}
-      {children}
+      {children && <span className={s.label}>{children}</span>}
       {svgRight && (
         <div
           className={cn(s.svg, {

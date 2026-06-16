@@ -16,15 +16,33 @@
   align-items: center;
   padding: 14px 0 16px;
   box-shadow: 0 -12px 28px rgba(0, 0, 0, 0.08);
+
+  &::before {
+    content: "";
+    position: absolute;
+    left: -18px;
+    right: -18px;
+    bottom: calc(100% - 22px);
+    height: 58px;
+    pointer-events: none;
+    z-index: 0;
+    background: linear-gradient(
+      to top,
+      var(--theme-50) 0%,
+      color-mix(in srgb, var(--theme-50) 88%, transparent) 54%,
+      color-mix(in srgb, var(--theme-50) 0%, transparent) 100%
+    );
+  }
 }
 
 .input {
+  z-index: 1;
   width: 100%;
   min-height: 24px;
   background-color: var(--theme-40);
   border: 1px solid var(--theme-30);
   border-radius: 8px;
-  overflow: hidden;
+  overflow: visible;
   position: relative;
   display: flex;
   justify-content: start;
@@ -35,7 +53,7 @@
 
   & textarea {
     font-family: Arial, Helvetica, sans-serif;
-    padding: 16px 58px 0px 16px;
+    padding: 14px 14px 2px;
     width: 100%;
     font-size: 16px;
     line-height: 1.5;
@@ -56,29 +74,401 @@
   .inputBottom {
     width: 100%;
     display: flex;
-    justify-content: end;
-    align-items: center;
-    min-height: 48px;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 8px;
+    min-height: 46px;
+    padding: 6px 10px 10px;
   }
 }
 
-.Btns {
-  position: absolute;
-  right: 10px;
-  bottom: 10px;
+.deadlineControls {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  min-width: 0;
+  flex-wrap: wrap;
+}
+
+.deadlineButton,
+.clearDeadlineButton,
+.createdAtBadge,
+.categoryControl {
+  height: 30px;
+  border: 1px solid var(--theme-30);
+  border-radius: 8px;
+  background-color: var(--theme-50);
+  color: var(--text);
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.createdAtBadge {
+  display: inline-flex;
+  align-items: center;
+  max-width: 150px;
+  padding: 0 9px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--theme-10);
+}
+
+.deadlineButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 10px;
+  cursor: pointer;
+}
+
+.deadlineGroup {
+  display: inline-flex;
+  align-items: stretch;
+  height: 30px;
+  max-width: 100%;
+  border: 1px solid var(--theme-30);
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: var(--theme-50);
+
+  .deadlineButton,
+  .clearDeadlineButton {
+    height: 100%;
+    border: 0;
+    border-radius: 0;
+    background-color: transparent;
+  }
+
+  .deadlineButton {
+    min-width: 0;
+  }
+
+  .clearDeadlineButton {
+    border-left: 1px solid var(--theme-30);
+  }
+
+  &:hover {
+    border-color: var(--theme-20);
+  }
+}
+
+.deadlineGroupActive {
+  border-color: $danger;
+  background-color: rgba(192, 42, 42, 0.08);
+}
+
+.categoryControl {
+  display: inline-flex;
+  align-items: center;
+  max-width: min(210px, 100%);
+  height: auto;
+  padding: 0;
+  border: 0;
+  background-color: transparent;
+  color: var(--theme-10);
+}
+
+.categoryDropdown {
+  min-width: 116px;
+  max-width: 170px;
+  height: 30px;
+  z-index: 2;
+
+  & button {
+    min-height: 30px;
+    height: 30px;
+  }
+}
+
+.deadlineIcon {
+  width: 15px;
+  height: 15px;
+  flex: 0 0 15px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  & svg {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+.deadlineButtonActive {
+  border-color: $danger;
+  color: $danger;
+  background-color: rgba(192, 42, 42, 0.08);
+}
+
+.clearDeadlineButton {
+  padding: 0 8px;
+  color: $danger;
+
+  &:hover {
+    border-color: $danger;
+  }
+}
+
+.deadlinePicker {
+  width: 100%;
+  border-top: 1px solid var(--theme-30);
+  padding: 10px 14px 12px;
+}
+
+.deadlineFields {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+
+  & label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text);
+    font-size: 14px;
+    white-space: nowrap;
+  }
+}
+
+.deadlineFieldControl {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  border: 1px solid var(--theme-30);
+  border-radius: 8px;
+  background-color: var(--theme-50);
+  color: var(--text);
+  padding: 0 8px 0 10px;
+
+  & input {
+    min-width: 0;
+    height: 100%;
+    border: 0;
+    appearance: none;
+    -webkit-appearance: none;
+    background-color: transparent;
+    color: var(--text);
+    outline: none;
+    padding: 0;
+  }
+
+  & input::-webkit-calendar-picker-indicator {
+    display: none;
+  }
+}
+
+.deadlineDateControl input {
+  width: 80px;
+}
+
+.deadlineDateControl {
+  width: auto;
+}
+
+.deadlineTimeControl input {
+  width: 40px;
+}
+
+.deadlineTimeControl {
+  width: auto;
+}
+
+.deadlineFieldIcon {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+  pointer-events: none;
+  color: var(--text);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  & svg {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+.deadlineQuickActions {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+
+  & button {
+    height: 30px;
+    border: 1px solid var(--theme-30);
+    border-radius: 8px;
+    background-color: var(--theme-50);
+    color: var(--text);
+    cursor: pointer;
+    font-size: 13px;
+    padding: 0 10px;
+
+    &:hover {
+      border-color: var(--theme-20);
+      background-color: var(--theme-40);
+    }
+  }
+}
+
+.actions {
   display: flex;
   justify-content: end;
-  align-items: center;
-  gap: 5px;
+  align-items: flex-end;
+  gap: 8px;
+  flex: 0 0 auto;
+  align-self: flex-end;
+}
+
+.submitAction,
+.cancelAction {
+  min-height: 36px;
+  min-width: 0;
+  border-radius: 8px;
+  padding: 0 12px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.submitAction {
+  border-color: var(--theme-30) !important;
+  background-color: #fff !important;
+  color: #1b1b1b !important;
+
+  &:hover:not(:disabled),
+  &:focus-visible:not(:disabled) {
+    border-color: var(--link) !important;
+    color: var(--link) !important;
+    background-color: #fff !important;
+  }
+}
+
+.cancelAction {
+  border-color: rgba(192, 42, 42, 0.42) !important;
+  background-color: rgba(192, 42, 42, 0.06);
+}
+
+@media (pointer: coarse) {
+  .deadlineGroup:hover {
+    border-color: var(--theme-30);
+  }
+
+  .deadlineGroupActive:hover {
+    border-color: $danger;
+  }
+
+  .clearDeadlineButton:hover {
+    border-color: transparent;
+  }
+
+  .deadlineQuickActions button:hover {
+    border-color: var(--theme-30);
+    background-color: var(--theme-50);
+  }
+
+  .submitAction:hover:not(:disabled) {
+    border-color: var(--theme-30) !important;
+    color: #1b1b1b !important;
+    background-color: #fff !important;
+  }
 }
 
 @media (max-width: 560px) {
   .inputContainer {
     width: calc(100% - 24px);
     padding-bottom: 12px;
+
+    &::before {
+      left: -12px;
+      right: -12px;
+      bottom: calc(100% - 18px);
+      height: 48px;
+    }
   }
 
   .input {
     border-radius: 8px;
+
+    .inputBottom {
+      min-height: 46px;
+      padding: 6px 10px 10px;
+      align-items: flex-end;
+      flex-wrap: wrap;
+    }
+  }
+
+  .deadlineControls {
+    flex: 1 1 0;
+    max-width: 100%;
+  }
+
+  .categoryControl {
+    max-width: calc(100% - 46px);
+  }
+
+  .categoryDropdown {
+    max-width: 132px;
+  }
+
+  .deadlineGroup {
+    max-width: calc(100% - 46px);
+  }
+
+  .deadlineGroup .deadlineButton {
+    flex: 1 1 auto;
+  }
+
+  .deadlineGroup .clearDeadlineButton {
+    width: 30px;
+    min-width: 30px;
+    padding: 0;
+    font-size: 0;
+
+    &::before {
+      content: "×";
+      font-size: 18px;
+      line-height: 1;
+    }
+  }
+
+  .deadlineFields {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .deadlineFields label {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .actions {
+    justify-content: flex-end;
+  }
+
+  .submitAction,
+  .cancelAction {
+    min-height: 38px;
+    padding: 0;
+  }
+
+  .submitAction {
+    width: 38px;
+    min-width: 38px;
+  }
+
+  .cancelAction {
+    width: 38px;
+    min-width: 38px;
+  }
+
+  .submitAction span {
+    display: none;
+  }
+
+  .cancelAction span {
+    display: none;
   }
 }

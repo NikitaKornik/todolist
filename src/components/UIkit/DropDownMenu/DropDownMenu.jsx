@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState, useRef, useContext } from "react";
+import cn from "classnames";
 import { motion, AnimatePresence } from "framer-motion";
 
 import Btn from "../Btn/Btn";
@@ -6,10 +7,12 @@ import s from "./DropDownMenu.module.scss";
 
 import { ReactComponent as ChevronDown } from "../../../image/chevronDown.svg";
 import { ReactComponent as ChevronUp } from "../../../image/chevronUp.svg";
+import { ReactComponent as SvgSearch } from "../../../image/search.svg";
 import {
   FunctionToDoContext,
-  ProfileToDoContext,
+  CategoryToDoContext,
 } from "../../../context/ToDoProvider/ToDoProvider";
+import { useI18n } from "../../../i18n/i18n";
 
 const dropDownAnimation = {
   animate: { height: "auto" },
@@ -18,15 +21,28 @@ const dropDownAnimation = {
   transition: { duration: 0.2 },
 };
 
-function DropDownMenu({ data, item, setItem, editable = false }) {
+function DropDownMenu({
+  className,
+  data,
+  direction = "down",
+  categoryTarget = "current",
+  item,
+  setItem,
+  editable = false,
+  getItemLabel,
+  triggerAriaLabel,
+}) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [sortMode, setSortMode] = useState("createdAt");
   const dropdownRef = useRef(null);
   const selectedItem = data.find((listItem) => listItem.id === item) || data[0];
+  const { t } = useI18n();
 
   const { setPopup } = useContext(FunctionToDoContext);
-  const { deleteProfile } = useContext(ProfileToDoContext);
+  const { deleteCategory } = useContext(CategoryToDoContext);
+  const getLabel = (listItem) =>
+    getItemLabel ? getItemLabel(listItem.name) : listItem.name;
 
   const visibleItems = useMemo(() => {
     const baseItems = data.filter((listItem) =>
@@ -57,44 +73,56 @@ function DropDownMenu({ data, item, setItem, editable = false }) {
     };
   }, []);
 
-  function addProfile() {
+  function addCategory() {
     setPopup({
-      type: "addProfile",
+      type: "addCategory",
+      categoryTarget,
       initialName: search.trim(),
     });
     setOpen(false);
   }
 
   return (
-    <div className={s.root} ref={dropdownRef}>
+    <div className={cn(s.root, className)} ref={dropdownRef}>
       <Btn
         className={s.listItem}
-        ariaLabel={`Открыть список: ${selectedItem.name}`}
+        ariaLabel={
+          triggerAriaLabel ||
+          t("dropdown.openList", { name: getLabel(selectedItem) })
+        }
         onClick={() => setOpen((prev) => !prev)}
         svgRight={
           open ? <ChevronUp width={"15px"} /> : <ChevronDown width={"15px"} />
         }
       >
-        {selectedItem.name}
+        {getLabel(selectedItem)}
       </Btn>
       <AnimatePresence>
         {open && (
-          <motion.ul className={s.dropdownMenu} {...dropDownAnimation}>
+          <motion.ul
+            className={cn(s.dropdownMenu, {
+              [s.dropdownMenuUp]: direction === "up",
+            })}
+            {...dropDownAnimation}
+          >
             {editable && (
               <li className={s.filterTools} role="presentation">
-                <input
-                  aria-label="Поиск фильтров"
-                  className={s.searchInput}
-                  value={search}
-                  onChange={(event) => setSearch(event.target.value)}
-                  onClick={(event) => event.stopPropagation()}
-                  placeholder="Поиск"
-                />
+                <label className={s.searchControl}>
+                  <SvgSearch aria-hidden="true" />
+                  <input
+                    aria-label={t("dropdown.searchFilters")}
+                    className={s.searchInput}
+                    value={search}
+                    onChange={(event) => setSearch(event.target.value)}
+                    onClick={(event) => event.stopPropagation()}
+                    placeholder={t("dropdown.search")}
+                  />
+                </label>
                 <button
                   aria-label={
                     sortMode === "createdAt"
-                      ? "Сортировать фильтры по имени"
-                      : "Сортировать фильтры по времени создания"
+                      ? t("dropdown.sortFiltersByName")
+                      : t("dropdown.sortFiltersByCreatedAt")
                   }
                   className={s.sortButton}
                   type="button"
@@ -105,7 +133,9 @@ function DropDownMenu({ data, item, setItem, editable = false }) {
                     );
                   }}
                 >
-                  {sortMode === "createdAt" ? "по дате" : "по имени"}
+                  {sortMode === "createdAt"
+                    ? t("dropdown.sortByCreatedAt")
+                    : t("dropdown.sortByName")}
                 </button>
               </li>
             )}
@@ -119,15 +149,17 @@ function DropDownMenu({ data, item, setItem, editable = false }) {
                     setOpen(false);
                   }}
                 >
-                  <span className={s.itemName}>{listItem.name}</span>
+                  <span className={s.itemName}>{getLabel(listItem)}</span>
                   {editable && listItem.deletable && (
                     <button
-                      aria-label={`Удалить фильтр ${listItem.name}`}
+                      aria-label={t("dropdown.deleteFilter", {
+                        name: listItem.name,
+                      })}
                       className={s.deleteItem}
                       type="button"
                       onClick={(event) => {
                         event.stopPropagation();
-                        deleteProfile(listItem.id);
+                        deleteCategory(listItem.id);
                       }}
                     >
                     </button>
@@ -136,8 +168,8 @@ function DropDownMenu({ data, item, setItem, editable = false }) {
               );
             })}
             {editable && (
-              <li className={s.editable} onClick={() => addProfile()}>
-                Добавить +
+              <li className={s.editable} onClick={() => addCategory()}>
+                {t("category.addItem")}
               </li>
             )}
           </motion.ul>

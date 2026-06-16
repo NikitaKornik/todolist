@@ -1,0 +1,132 @@
+.root {
+  width: 100%;
+  border: 1px solid var(--theme-30);
+  border-radius: 8px;
+  background-color: var(--theme-40);
+  color: var(--text);
+  padding: 18px;
+}
+
+.header {
+  border-bottom: 1px solid var(--theme-30);
+  margin-bottom: 18px;
+  padding-bottom: 16px;
+
+  & h1 {
+    margin: 0;
+    font-size: 24px;
+    line-height: 1.2;
+  }
+}
+
+.settingGroup {
+  display: grid;
+  grid-template-columns: minmax(180px, 0.8fr) minmax(260px, 1.2fr);
+  gap: 16px;
+  align-items: start;
+  padding: 16px 0;
+
+  & + & {
+    border-top: 1px solid var(--theme-30);
+  }
+}
+
+.settingText h2 {
+  margin: 0;
+  font-size: 17px;
+  line-height: 1.2;
+}
+
+.optionGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.segmented {
+  width: min(100%, 360px);
+}
+
+.optionGrid button {
+  min-height: 42px;
+  border: 1px solid var(--theme-30);
+  border-radius: 8px;
+  background-color: var(--theme-50);
+  color: var(--text);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 14px;
+  padding: 8px 10px;
+  transition: 0.18s border-color, 0.18s background-color, 0.18s color;
+  text-transform: capitalize;
+
+  &:hover {
+    border-color: var(--link);
+    color: var(--link);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--link);
+    outline-offset: 2px;
+  }
+}
+
+.activeOption {
+  border-color: var(--link) !important;
+  background-color: var(--theme-30) !important;
+  color: var(--link) !important;
+}
+
+@media (pointer: coarse) {
+  .optionGrid button:hover {
+    border-color: var(--theme-30);
+    color: var(--text);
+  }
+
+  .optionGrid .activeOption:hover {
+    border-color: var(--link) !important;
+    color: var(--link) !important;
+  }
+}
+
+.themeSwatch {
+  width: 16px;
+  height: 16px;
+  border: 1px solid var(--theme-30);
+  border-radius: 50%;
+  flex: 0 0 16px;
+}
+
+.lightTheme {
+  background: linear-gradient(135deg, #ffffff 0%, #d8e0ec 100%);
+}
+
+.darkTheme {
+  background: linear-gradient(135deg, #20242c 0%, #5b6573 100%);
+}
+
+.blueTheme {
+  background: linear-gradient(135deg, #dcecff 0%, #3774c2 100%);
+}
+
+.blackTheme {
+  background: linear-gradient(135deg, #050505 0%, #343434 100%);
+}
+
+@media (max-width: 700px) {
+  .root {
+    padding: 14px;
+  }
+
+  .settingGroup {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .optionGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

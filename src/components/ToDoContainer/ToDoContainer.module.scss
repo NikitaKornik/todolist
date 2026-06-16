@@ -3,8 +3,12 @@
 .root {
   width: min(100%, 1040px);
   position: relative;
-  margin: 72px auto 0;
+  margin: 82px auto 0;
   padding: 0 0 20px;
+}
+
+.view {
+  width: 100%;
 }
 
 .toDoElements {
@@ -46,7 +50,7 @@
   opacity: 0.85;
 }
 
-@media (max-width: 760px) {
+@media (max-width: 900px) {
   .root {
     margin-top: 112px;
   }
@@ -59,11 +63,5 @@
         grid-column: auto;
       }
     }
-  }
-}
-
-@media (max-width: 420px) {
-  .root {
-    margin-top: 152px;
   }
 }

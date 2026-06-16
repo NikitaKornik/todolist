@@ -11,6 +11,8 @@ import { ReactComponent as SvgHeart } from "../../image/heart.svg";
 import { ReactComponent as SvgHeartFill } from "../../image/heartFill.svg";
 import { ReactComponent as SvgCheckBoxActive } from "../../image/checkBoxActive.svg";
 import { ReactComponent as SvgCheckBoxDisable } from "../../image/checkBoxDisable.svg";
+import { formatDeadline } from "../../utils/deadline";
+import { useI18n } from "../../i18n/i18n";
 
 const ToDoElementAnimation = {
   animate: {
@@ -98,19 +100,22 @@ const ToDoElement = memo(
     onClickEdit,
     onClickDelete,
     onClickFavorite,
-    profile,
+    category,
     favorite,
     id,
     focus,
     checked,
     onClickCheckBox,
     date,
+    deadline,
     searchMatch,
     draggable,
     isDragging,
     onPointerDown,
+    onTouchStart,
   }) => {
     const animationProps = draggable ? {} : ToDoElementAnimation;
+    const { categoryLabel, locale, t } = useI18n();
 
     return (
       <motion.div
@@ -126,8 +131,8 @@ const ToDoElement = memo(
         data-drag-enabled={draggable}
         data-drag-id={id}
         id={id}
-        onPointerDown={(event) => onPointerDown?.(id, event)}
-        onMouseDown={(event) => onPointerDown?.(id, event)}
+        onPointerDownCapture={(event) => onPointerDown?.(id, event)}
+        onTouchStartCapture={(event) => onTouchStart?.(id, event)}
         data-testid={`todo-item-${text}`}
         {...animationProps}
       >
@@ -138,16 +143,23 @@ const ToDoElement = memo(
             </ReactMarkdown>
           </div>
           <div className={s.info}>
-            <div className={s.profile}>{profile && `Профиль: ${profile}`}</div>
-            <div className={s.date}>{date && `Дата: ${date}`}</div>
+            <div className={s.category}>
+              {category && `${t("category.label")}: ${categoryLabel(category)}`}
+            </div>
+            <div className={s.date}>{date && `${t("todo.date")}: ${date}`}</div>
           </div>
+          {deadline && (
+            <div className={s.deadline}>
+              {t("deadline.label")}: {formatDeadline(deadline, new Date(), { locale, t })}
+            </div>
+          )}
           <div className={s.btnContainer}>
             <Btn
               variant={checked ? "checked" : "BGnone"}
               size={"size_svg"}
               svgRight={checked ? <SvgCheckBoxActive /> : <SvgCheckBoxDisable />}
               className={s.hover}
-              ariaLabel={checked ? "Снять отметку" : "Отметить выполненным"}
+              ariaLabel={checked ? t("todo.unmarkDone") : t("todo.markDone")}
               onClick={() => onClickCheckBox(id)}
             ></Btn>
             <Btn
@@ -155,15 +167,17 @@ const ToDoElement = memo(
               size={"size_svg"}
               svgRight={favorite ? <SvgHeartFill /> : <SvgHeart />}
               className={s.hover}
-              ariaLabel={favorite ? "Убрать из избранного" : "Добавить в избранное"}
+              ariaLabel={
+                favorite ? t("todo.removeFromFavorite") : t("todo.addToFavorite")
+              }
               onClick={() => onClickFavorite(id)}
             ></Btn>
             <Btn
               variant="BGnone"
               size={"size_svg"}
               className={s.hover}
-              ariaLabel={focus !== id ? "Редактировать" : "Закрыть редактирование"}
-              onClick={() => onClickEdit(id, text)}
+              ariaLabel={focus !== id ? t("todo.edit") : t("todo.closeEdit")}
+              onClick={() => onClickEdit(id, text, deadline, category)}
               svgRight={focus !== id ? <SvgEdit /> : <SvgCancel />}
             ></Btn>
             <Btn
@@ -171,7 +185,7 @@ const ToDoElement = memo(
               size={"size_svg"}
               svgRight={<SvgDelete />}
               className={s.hover}
-              ariaLabel="Удалить"
+              ariaLabel={t("todo.delete")}
               onClick={() => onClickDelete(id)}
             ></Btn>
           </div>
