@@ -23,7 +23,12 @@ import { ToDoElement } from "../ToDoElement/ToDoElement";
 import { ToDoInput } from "../ToDoInput/ToDoInput";
 import s from "./ToDoContainer.module.scss";
 import { findNoteSearchMatch } from "../../utils/noteSearch";
-import { getDateInputValue } from "../../utils/calendar";
+import {
+  buildScheduledAt,
+  getDateInputValue,
+  getScheduledDate,
+  getScheduledTime,
+} from "../../utils/calendar";
 import {
   buildDeadline,
   getDeadlineDate,
@@ -31,6 +36,7 @@ import {
 } from "../../utils/deadline";
 import { sortToDoByPriority } from "../../utils/todoPriority";
 import { useI18n } from "../../i18n/i18n";
+import { isCoarsePointerDevice } from "../../utils/pointer";
 
 const blockAnimation = {
   animate: { scale: 1 },
@@ -49,13 +55,6 @@ const viewAnimation = {
 const TOUCH_DRAG_DELAY = 500;
 const TOUCH_SCROLL_THRESHOLD = 8;
 
-function isCoarsePointerDevice() {
-  return (
-    typeof window.matchMedia === "function" &&
-    Boolean(window.matchMedia("(pointer: coarse)")?.matches)
-  );
-}
-
 export default function ToDoContainer() {
   const textareaRef = useRef(null);
   const listRef = useRef(null);
@@ -67,6 +66,8 @@ export default function ToDoContainer() {
   const [selectedCalendarDate, setSelectedCalendarDate] = useState(() =>
     getDateInputValue(new Date())
   );
+  const [selectedCalendarTime, setSelectedCalendarTime] = useState("");
+  const [editingScheduledAtDraft, setEditingScheduledAtDraft] = useState(null);
   const [isDeadlineCalendarPicking, setIsDeadlineCalendarPicking] =
     useState(false);
   const [isDeadlinePickerOpen, setIsDeadlinePickerOpen] = useState(false);
@@ -81,7 +82,7 @@ export default function ToDoContainer() {
 
   const { focus, popup, toDoItems } = useContext(ToDoContext);
   const { categoryData, category } = useContext(CategoryToDoContext);
-  const { addItem, reorderToDoItems, requestDeleteCompletedItems } =
+  const { addItem, reorderToDoItems, requestDeleteCompletedItems, setPopup } =
     useContext(FunctionToDoContext);
   const { deadline, input, setDeadline } = useContext(InputToDoContext);
   const { weekStart } = useContext(SettingsToDoContext);
@@ -111,6 +112,42 @@ export default function ToDoContainer() {
   );
 
   const [textAreaHeight, setTextAreaHeight] = useState(0);
+  const editingItem = useMemo(
+    () => toDoItems.find((item) => item.id === focus) || null,
+    [focus, toDoItems]
+  );
+  const editingScheduledAt =
+    editingScheduledAtDraft ?? editingItem?.scheduledAt ?? "";
+  const editingScheduledDate = getScheduledDate(editingScheduledAt);
+  const editingScheduledTime = getScheduledTime(editingScheduledAt);
+  const deadlineMinDate = useMemo(() => {
+    const today = getDateInputValue(new Date());
+    const scheduledDate =
+      focus !== "" ? editingScheduledDate : viewMode === "calendar" ? selectedCalendarDate : "";
+
+    return scheduledDate && scheduledDate > today ? scheduledDate : today;
+  }, [editingScheduledDate, focus, selectedCalendarDate, viewMode]);
+  const deadlineMinTime = useMemo(() => {
+    if (focus !== "") {
+      return deadlineMinDate === editingScheduledDate
+        ? editingScheduledTime || undefined
+        : undefined;
+    }
+
+    if (viewMode !== "calendar" || deadlineMinDate !== selectedCalendarDate) {
+      return undefined;
+    }
+
+    return selectedCalendarTime || undefined;
+  }, [
+    deadlineMinDate,
+    editingScheduledDate,
+    editingScheduledTime,
+    focus,
+    selectedCalendarDate,
+    selectedCalendarTime,
+    viewMode,
+  ]);
 
   const inputMaxHeight = useMemo(
     () => ({
@@ -119,6 +156,12 @@ export default function ToDoContainer() {
     }),
     [headerOffset, textAreaHeight]
   );
+
+  useEffect(() => {
+    if (focus === "" || !editingItem) {
+      setEditingScheduledAtDraft(null);
+    }
+  }, [editingItem, focus]);
 
   const closeDeadlinePicking = useCallback(() => {
     setIsDeadlineCalendarPicking(false);
@@ -168,6 +211,55 @@ export default function ToDoContainer() {
     [addItem, focus, input, scrollToTopAfterCreate]
   );
 
+  const getComposerScheduledAt = useCallback(() => {
+    if (focus !== "") {
+      return buildScheduledAt(editingScheduledDate, editingScheduledTime);
+    }
+
+    return viewMode === "calendar"
+      ? buildScheduledAt(selectedCalendarDate, selectedCalendarTime)
+      : undefined;
+  }, [
+    editingScheduledDate,
+    editingScheduledTime,
+    focus,
+    selectedCalendarDate,
+    selectedCalendarTime,
+    viewMode,
+  ]);
+
+  const isDeadlineBeforeAllowedTime = useCallback(() => {
+    const deadlineDate = getDeadlineDate(deadline);
+    const deadlineTime = getDeadlineTime(deadline);
+
+    if (!deadlineDate || !deadlineTime) {
+      return false;
+    }
+
+    const now = new Date();
+    const today = getDateInputValue(now);
+    const currentTime = `${String(now.getHours()).padStart(2, "0")}:${String(
+      now.getMinutes()
+    ).padStart(2, "0")}`;
+    const minTimes = [];
+
+    if (deadlineDate === deadlineMinDate && deadlineMinTime) {
+      minTimes.push(deadlineMinTime);
+    }
+
+    if (deadlineDate === today) {
+      minTimes.push(currentTime);
+    }
+
+    if (minTimes.length === 0) {
+      return false;
+    }
+
+    const minTime = minTimes.sort()[minTimes.length - 1];
+
+    return deadlineTime < minTime;
+  }, [deadline, deadlineMinDate, deadlineMinTime]);
+
   useEffect(() => {
     const handleKeyDown = (key) => {
       if (key.key === "Escape") {
@@ -178,8 +270,14 @@ export default function ToDoContainer() {
       if (key.key === "Enter" && !key.shiftKey) {
         if (!popup && viewMode !== "settings") {
           key.preventDefault();
+
+          if (isDeadlineBeforeAllowedTime()) {
+            setPopup({ type: "deadlineWarning" });
+            return;
+          }
+
           const didAddItem = handleAddItem({
-            createdAt: viewMode === "calendar" ? selectedCalendarDate : undefined,
+            scheduledAt: getComposerScheduledAt(),
           });
 
           if (didAddItem) {
@@ -199,8 +297,10 @@ export default function ToDoContainer() {
     cancel,
     handleAddItem,
     closeDeadlinePicking,
-    selectedCalendarDate,
+    getComposerScheduledAt,
+    isDeadlineBeforeAllowedTime,
     viewMode,
+    setPopup,
   ]);
 
   useEffect(() => {
@@ -214,19 +314,21 @@ export default function ToDoContainer() {
     }
   }, [isDeadlinePickerOpen, viewMode]);
 
-  const filteredToDo = useMemo(() => {
-    const categoryFilteredToDo =
+  const selectedCategoryName = useMemo(
+    () => categoryData.find((categoryItem) => categoryItem.id === category)?.name,
+    [category, categoryData]
+  );
+  const categoryFilteredToDo = useMemo(
+    () =>
       category === 0
         ? toDoItems
-        : toDoItems.filter((item) => {
-            const selectedCategory = categoryData.find(
-              (categoryItem) => categoryItem.id === category
-            );
+        : toDoItems.filter(
+            (item) => item.category === selectedCategoryName || item.favorite
+          ),
+    [category, selectedCategoryName, toDoItems]
+  );
 
-            return (
-              item.category === selectedCategory?.name || item.favorite === true
-            );
-          });
+  const filteredToDo = useMemo(() => {
 
     const trimmedSearchQuery = searchQuery.trim();
 
@@ -243,23 +345,9 @@ export default function ToDoContainer() {
         searchMatch: findNoteSearchMatch(item.text, trimmedSearchQuery),
       }))
       .filter(({ searchMatch }) => Boolean(searchMatch));
-  }, [toDoItems, category, categoryData, searchQuery]);
+  }, [categoryFilteredToDo, searchQuery]);
 
-  const calendarItems = useMemo(
-    () =>
-      category === 0
-        ? toDoItems
-        : toDoItems.filter((item) => {
-            const selectedCategory = categoryData.find(
-              (categoryItem) => categoryItem.id === category
-            );
-
-            return (
-              item.category === selectedCategory?.name || item.favorite === true
-            );
-          }),
-    [category, categoryData, toDoItems]
-  );
+  const calendarItems = categoryFilteredToDo;
 
   const visibleToDo = useMemo(
     () => sortToDoByPriority([...filteredToDo].reverse()),
@@ -583,13 +671,26 @@ export default function ToDoContainer() {
   const handleCalendarDateClick = useCallback(
     (date) => {
       if (isDeadlineCalendarPicking) {
-        setDeadline(buildDeadline(date, getDeadlineTime(deadline)));
+        if (date < deadlineMinDate) {
+          return;
+        }
+
+        const deadlineTime = getDeadlineTime(deadline);
+
+        const nextDeadline = buildDeadline(date, deadlineTime);
+
+        setDeadline(nextDeadline);
         return;
       }
 
       setSelectedCalendarDate(date);
     },
-    [deadline, isDeadlineCalendarPicking, setDeadline]
+    [
+      deadline,
+      deadlineMinDate,
+      isDeadlineCalendarPicking,
+      setDeadline,
+    ]
   );
 
   const handleDeleteCompletedForCalendarDay = useCallback(
@@ -613,6 +714,7 @@ export default function ToDoContainer() {
         checked={item.checked}
         date={item.date}
         deadline={item.deadline}
+        scheduledAt={item.scheduledAt}
         onClickFavorite={handleFavorite}
         onClickCheckBox={handleCheckBox}
         onClickEdit={handleEdit}
@@ -663,6 +765,8 @@ export default function ToDoContainer() {
               onDeleteCompletedDay={handleDeleteCompletedForCalendarDay}
               onReorderItems={reorderToDoItems}
               isDeadlinePicking={isDeadlineCalendarPicking}
+              deadlineMinDate={deadlineMinDate}
+              deadlineMinTime={deadlineMinTime}
               searchQuery={searchQuery}
               selectedDeadlineDate={getDeadlineDate(deadline)}
               selectedDate={selectedCalendarDate}
@@ -698,7 +802,8 @@ export default function ToDoContainer() {
       </AnimatePresence>
       {viewMode !== "settings" && (
         <ToDoInput
-          createdAt={viewMode === "calendar" ? selectedCalendarDate : undefined}
+          deadlineMinDate={deadlineMinDate}
+          deadlineMinTime={deadlineMinTime}
           isDeadlineCalendarPicking={isDeadlineCalendarPicking}
           onDeadlineCalendarPickCancel={closeDeadlinePicking}
           onDeadlinePickerOpenChange={setIsDeadlinePickerOpen}
@@ -707,7 +812,34 @@ export default function ToDoContainer() {
               ? () => setIsDeadlineCalendarPicking((prev) => !prev)
               : undefined
           }
-          onAddItem={handleAddItem}
+          onAddItem={(options) =>
+            handleAddItem({
+              ...options,
+              scheduledAt: getComposerScheduledAt(),
+            })
+          }
+          scheduledDate={
+            focus !== ""
+              ? editingScheduledDate
+              : viewMode === "calendar"
+              ? selectedCalendarDate
+              : undefined
+          }
+          scheduledTime={
+            focus !== ""
+              ? editingScheduledTime
+              : viewMode === "calendar"
+              ? selectedCalendarTime
+              : ""
+          }
+          setScheduledTime={
+            focus !== ""
+              ? (time) =>
+                  setEditingScheduledAtDraft(
+                    buildScheduledAt(editingScheduledDate, time)
+                  )
+              : setSelectedCalendarTime
+          }
           textareaRef={textareaRef}
           setTextAreaHeight={setTextAreaHeight}
         />

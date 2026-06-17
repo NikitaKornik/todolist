@@ -12,6 +12,7 @@ import { ReactComponent as SvgHeartFill } from "../../image/heartFill.svg";
 import { ReactComponent as SvgCheckBoxActive } from "../../image/checkBoxActive.svg";
 import { ReactComponent as SvgCheckBoxDisable } from "../../image/checkBoxDisable.svg";
 import { formatDeadline } from "../../utils/deadline";
+import { formatScheduledAt } from "../../utils/calendar";
 import { useI18n } from "../../i18n/i18n";
 
 const ToDoElementAnimation = {
@@ -108,6 +109,7 @@ const ToDoElement = memo(
     onClickCheckBox,
     date,
     deadline,
+    scheduledAt,
     searchMatch,
     draggable,
     isDragging,
@@ -146,7 +148,12 @@ const ToDoElement = memo(
             <div className={s.category}>
               {category && `${t("category.label")}: ${categoryLabel(category)}`}
             </div>
-            <div className={s.date}>{date && `${t("todo.date")}: ${date}`}</div>
+            <div className={s.date}>{date && `${t("todo.created")}: ${date}`}</div>
+            {scheduledAt && (
+              <div className={s.date}>
+                {t("todo.date")}: {formatScheduledAt(scheduledAt, locale)}
+              </div>
+            )}
           </div>
           {deadline && (
             <div className={s.deadline}>

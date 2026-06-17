@@ -8,6 +8,40 @@ export function getDateInputValue(date) {
   return `${year}-${month}-${day}`;
 }
 
+export function buildScheduledAt(date, time = "") {
+  if (!date) {
+    return "";
+  }
+
+  return time ? `${date}T${time}` : date;
+}
+
+export function getScheduledDate(value) {
+  return value ? String(value).split("T")[0] : "";
+}
+
+export function getScheduledTime(value) {
+  return String(value || "").split("T")[1] || "";
+}
+
+export function formatScheduledAt(value, locale = "ru-RU") {
+  const dateValue = getScheduledDate(value);
+  const time = getScheduledTime(value);
+  const date = parseInputDate(dateValue);
+
+  if (!date) {
+    return "";
+  }
+
+  const formattedDate = date.toLocaleDateString(locale, {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+
+  return time ? `${formattedDate}, ${time}` : formattedDate;
+}
+
 export function parseTodoCreatedDate(dateValue) {
   if (!dateValue) {
     return "";

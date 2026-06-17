@@ -130,7 +130,15 @@ function seedTestAccount() {
   localStorage.setItem("todoAccounts", JSON.stringify([TEST_ACCOUNT]));
   localStorage.setItem("todoCurrentAccountId", TEST_ACCOUNT.id);
 
-  ["toDoItems", "Categories", "Profiles", "theme", "weekStart", "language"].forEach((key) => {
+  [
+    "toDoItems",
+    "Categories",
+    "Profiles",
+    "theme",
+    "weekStart",
+    "language",
+    "deleteAfterDeadline",
+  ].forEach((key) => {
     const legacyValue = localStorage.getItem(key);
 
     if (legacyValue !== null) {
@@ -264,6 +272,13 @@ function getDateInputValue(date) {
   const day = String(date.getDate()).padStart(2, "0");
 
   return `${year}-${month}-${day}`;
+}
+
+function getRelativeDateInputValue(dayOffset) {
+  const date = new Date();
+  date.setDate(date.getDate() + dayOffset);
+
+  return getDateInputValue(date);
 }
 
 function getCalendarDayLabel(dateValue) {
@@ -472,32 +487,40 @@ test("shows deadline clear action as part of the selected deadline control", () 
 });
 
 test("adds deadline time and keeps the task in the selected calendar day", () => {
-  const today = getDateInputValue(new Date());
-  renderTodoApp();
+  jest.useFakeTimers("modern");
+  jest.setSystemTime(new Date(2026, 5, 16, 9, 0, 0));
+  try {
+    const today = getDateInputValue(new Date());
+    renderTodoApp();
 
-  const input = screen.getByLabelText("Текст заметки");
-  userEvent.type(input, "Созвон в обед");
-  userEvent.click(screen.getByRole("button", { name: "Выбрать дедлайн" }));
-  fireEvent.change(screen.getByLabelText("Дедлайн"), {
-    target: { value: today },
-  });
-  fireEvent.change(screen.getByLabelText("Время дедлайна"), {
-    target: { value: "14:30" },
-  });
-  userEvent.click(screen.getByRole("button", { name: "Добавить заметку" }));
+    const input = screen.getByLabelText("Текст заметки");
+    userEvent.type(input, "Созвон в обед");
+    userEvent.click(screen.getByRole("button", { name: "Выбрать дедлайн" }));
+    fireEvent.change(screen.getByLabelText("Дедлайн"), {
+      target: { value: today },
+    });
+    fireEvent.change(screen.getByLabelText("Время дедлайна"), {
+      target: { value: "14:30" },
+    });
+    userEvent.click(screen.getByRole("button", { name: "Добавить заметку" }));
 
-  expect(screen.getByText("Дедлайн: Сегодня, 14:30")).toBeInTheDocument();
+    expect(screen.getByText("Дедлайн: Сегодня, 14:30")).toBeInTheDocument();
 
-  userEvent.click(screen.getByRole("button", { name: "Открыть календарь" }));
-  userEvent.click(
-    screen.getByRole("button", { name: `Открыть день ${getCalendarDayLabel(today)}` })
-  );
+    userEvent.click(screen.getByRole("button", { name: "Открыть календарь" }));
+    userEvent.click(
+      screen.getByRole("button", {
+        name: `Открыть день ${getCalendarDayLabel(today)}`,
+      })
+    );
 
-  const deadlineSection = screen.getByLabelText("Дедлайны выбранного дня");
-  expect(within(deadlineSection).getByText("Созвон в обед")).toBeInTheDocument();
-  expect(
-    within(deadlineSection).getByText("Дедлайн: Сегодня, 14:30")
-  ).toBeInTheDocument();
+    const deadlineSection = screen.getByLabelText("Дедлайны выбранного дня");
+    expect(within(deadlineSection).getByText("Созвон в обед")).toBeInTheDocument();
+    expect(
+      within(deadlineSection).getByText("Дедлайн: Сегодня, 14:30")
+    ).toBeInTheDocument();
+  } finally {
+    jest.useRealTimers();
+  }
 });
 
 test("limits manual deadline date input to year 9999", () => {
@@ -513,6 +536,40 @@ test("limits manual deadline date input to year 9999", () => {
   });
 
   expect(deadlineInput).toHaveValue("9999-12-31");
+});
+
+test("prevents choosing a past deadline", () => {
+  jest.useFakeTimers("modern");
+  jest.setSystemTime(new Date(2026, 5, 16, 12, 0, 0));
+  try {
+    renderTodoApp();
+
+    userEvent.click(screen.getByRole("button", { name: "Выбрать дедлайн" }));
+
+    const deadlineInput = screen.getByLabelText("Дедлайн");
+    expect(deadlineInput).toHaveAttribute("min", "2026-06-16");
+
+    fireEvent.change(deadlineInput, {
+      target: { value: "2026-06-15" },
+    });
+    expect(deadlineInput).toHaveValue("");
+
+    fireEvent.change(deadlineInput, {
+      target: { value: "2026-06-16" },
+    });
+    fireEvent.change(screen.getByLabelText("Время дедлайна"), {
+      target: { value: "11:30" },
+    });
+    expect(screen.getByLabelText("Время дедлайна")).toHaveValue("11:30");
+
+    userEvent.type(screen.getByLabelText("Текст заметки"), "Просроченный дедлайн");
+    userEvent.click(screen.getByRole("button", { name: "Добавить заметку" }));
+
+    expect(screen.getByText("Дедлайн раньше даты заметки")).toBeInTheDocument();
+    expect(screen.queryByTestId("todo-item-Просроченный дедлайн")).not.toBeInTheDocument();
+  } finally {
+    jest.useRealTimers();
+  }
 });
 
 test("sets a note deadline from the next clicked calendar day", () => {
@@ -543,6 +600,152 @@ test("sets a note deadline from the next clicked calendar day", () => {
   ).toBeInTheDocument();
 });
 
+test("keeps note creation date separate from the selected calendar date", () => {
+  jest.useFakeTimers("modern");
+  jest.setSystemTime(new Date(2026, 5, 16, 9, 15, 0));
+  try {
+    renderTodoApp();
+
+    userEvent.click(screen.getByRole("button", { name: "Открыть календарь" }));
+    userEvent.click(screen.getByRole("button", { name: "Открыть день 18 июня 2026" }));
+    userEvent.type(screen.getByLabelText("Текст заметки"), "План на будущее");
+    userEvent.click(screen.getByRole("button", { name: "Добавить заметку" }));
+
+    const note = screen.getByTestId("todo-item-План на будущее");
+
+    expect(within(note).getByText(/Добавлено: 16\.06\.2026/)).toBeInTheDocument();
+    expect(within(note).getByText("Дата: 18.06.2026")).toBeInTheDocument();
+  } finally {
+    jest.useRealTimers();
+  }
+});
+
+test("adds scheduled time and prevents a deadline before the scheduled moment", () => {
+  jest.useFakeTimers("modern");
+  jest.setSystemTime(new Date(2026, 5, 16, 9, 0, 0));
+  try {
+    renderTodoApp();
+
+    userEvent.click(screen.getByRole("button", { name: "Открыть календарь" }));
+    userEvent.click(screen.getByRole("button", { name: "Открыть день 18 июня 2026" }));
+    fireEvent.change(screen.getByLabelText("Время заметки"), {
+      target: { value: "10:00" },
+    });
+    userEvent.click(screen.getByRole("button", { name: "Выбрать дедлайн" }));
+    userEvent.click(screen.getByRole("button", { name: "Выбрать дедлайн: 18 июня 2026" }));
+
+    const deadlineTimeInput = screen.getByLabelText("Время дедлайна");
+
+    fireEvent.change(deadlineTimeInput, {
+      target: { value: "09:30" },
+    });
+    expect(deadlineTimeInput).toHaveValue("09:30");
+
+    userEvent.type(screen.getByLabelText("Текст заметки"), "Задача ко времени");
+    userEvent.click(screen.getByRole("button", { name: "Добавить заметку" }));
+
+    expect(screen.getByText("Дедлайн раньше даты заметки")).toBeInTheDocument();
+    expect(screen.queryByTestId("todo-item-Задача ко времени")).not.toBeInTheDocument();
+
+    userEvent.click(screen.getByRole("button", { name: "Понятно" }));
+
+    fireEvent.change(deadlineTimeInput, {
+      target: { value: "10:30" },
+    });
+    userEvent.click(screen.getByRole("button", { name: "Добавить заметку" }));
+
+    const note = screen.getAllByTestId("todo-item-Задача ко времени")[0];
+
+    expect(within(note).getByText("Дата: 18.06.2026, 10:00")).toBeInTheDocument();
+    expect(within(note).getByText("Дедлайн: 18.06.2026, 10:30")).toBeInTheDocument();
+  } finally {
+    jest.useRealTimers();
+  }
+});
+
+test("syncs same-day deadline time up to the scheduled note time", () => {
+  jest.useFakeTimers("modern");
+  jest.setSystemTime(new Date(2026, 5, 16, 9, 0, 0));
+  try {
+    renderTodoApp();
+
+    userEvent.click(screen.getByRole("button", { name: "Открыть календарь" }));
+    userEvent.click(screen.getByRole("button", { name: "Открыть день 18 июня 2026" }));
+    fireEvent.change(screen.getByLabelText("Время заметки"), {
+      target: { value: "10:00" },
+    });
+    userEvent.click(screen.getByRole("button", { name: "Выбрать дедлайн" }));
+    userEvent.click(screen.getByRole("button", { name: "Выбрать дедлайн: 18 июня 2026" }));
+
+    const deadlineTimeInput = screen.getByLabelText("Время дедлайна");
+    expect(deadlineTimeInput).toHaveValue("10:00");
+
+    fireEvent.change(deadlineTimeInput, {
+      target: { value: "11:00" },
+    });
+    expect(deadlineTimeInput).toHaveValue("11:00");
+
+    fireEvent.change(screen.getByLabelText("Время заметки"), {
+      target: { value: "10:30" },
+    });
+    expect(deadlineTimeInput).toHaveValue("11:00");
+
+    fireEvent.change(screen.getByLabelText("Время заметки"), {
+      target: { value: "11:30" },
+    });
+    expect(deadlineTimeInput).toHaveValue("11:00");
+  } finally {
+    jest.useRealTimers();
+  }
+});
+
+test("warns when the deadline is earlier than the scheduled note time", () => {
+  jest.useFakeTimers("modern");
+  jest.setSystemTime(new Date(2026, 5, 16, 9, 0, 0));
+  try {
+    renderTodoApp();
+
+    userEvent.click(screen.getByRole("button", { name: "Открыть календарь" }));
+    userEvent.click(screen.getByRole("button", { name: "Открыть день 18 июня 2026" }));
+    fireEvent.change(screen.getByLabelText("Время заметки"), {
+      target: { value: "10:00" },
+    });
+    userEvent.click(screen.getByRole("button", { name: "Выбрать дедлайн" }));
+    userEvent.click(screen.getByRole("button", { name: "Выбрать дедлайн: 18 июня 2026" }));
+
+    fireEvent.change(screen.getByLabelText("Время дедлайна"), {
+      target: { value: "09:30" },
+    });
+
+    expect(screen.queryByText("Дедлайн раньше даты заметки")).not.toBeInTheDocument();
+    expect(screen.getByLabelText("Время дедлайна")).toHaveValue("09:30");
+
+    userEvent.type(screen.getByLabelText("Текст заметки"), "Невалидный дедлайн");
+    userEvent.click(screen.getByRole("button", { name: "Добавить заметку" }));
+
+    expect(screen.getByText("Дедлайн раньше даты заметки")).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "Дедлайн не может быть раньше выбранной даты и времени заметки. Исправьте дату или время дедлайна."
+      )
+    ).toBeInTheDocument();
+    expect(screen.queryByTestId("todo-item-Невалидный дедлайн")).not.toBeInTheDocument();
+
+    userEvent.click(screen.getByRole("button", { name: "Понятно" }));
+    expect(
+      screen.queryByText("Дедлайн раньше даты заметки")
+    ).not.toBeInTheDocument();
+
+    const deadlineTimeInput = screen.getByLabelText("Время дедлайна");
+    fireEvent.change(deadlineTimeInput, {
+      target: { value: "10:30" },
+    });
+    expect(deadlineTimeInput).toHaveValue("10:30");
+  } finally {
+    jest.useRealTimers();
+  }
+});
+
 test("shows manual deadline fields while picking a deadline from calendar", () => {
   renderTodoApp();
 
@@ -554,6 +757,62 @@ test("shows manual deadline fields while picking a deadline from calendar", () =
   expect(
     screen.getByRole("button", { name: "Выбрать дедлайн: 20 июня 2026" })
   ).toBeInTheDocument();
+});
+
+test("disables past calendar days while picking a deadline", () => {
+  jest.useFakeTimers("modern");
+  jest.setSystemTime(new Date(2026, 5, 16, 12, 0, 0));
+  try {
+    renderTodoApp();
+
+    userEvent.click(screen.getByRole("button", { name: "Открыть календарь" }));
+    userEvent.click(screen.getByRole("button", { name: "Выбрать дедлайн" }));
+
+    const pastDayButton = screen.getByRole("button", {
+      name: "Выбрать дедлайн: 15 июня 2026",
+    });
+    const todayButton = screen.getByRole("button", {
+      name: "Выбрать дедлайн: 16 июня 2026",
+    });
+
+    expect(pastDayButton).toBeDisabled();
+    expect(pastDayButton).toHaveAttribute("aria-disabled", "true");
+    expect(todayButton).not.toBeDisabled();
+  } finally {
+    jest.useRealTimers();
+  }
+});
+
+test("disables deadline dates before the selected calendar note date", () => {
+  jest.useFakeTimers("modern");
+  jest.setSystemTime(new Date(2026, 5, 16, 12, 0, 0));
+  try {
+    renderTodoApp();
+
+    userEvent.click(screen.getByRole("button", { name: "Открыть календарь" }));
+    userEvent.click(screen.getByRole("button", { name: "Открыть день 18 июня 2026" }));
+    userEvent.click(screen.getByRole("button", { name: "Выбрать дедлайн" }));
+
+    const beforeNoteDateButton = screen.getByRole("button", {
+      name: "Выбрать дедлайн: 17 июня 2026",
+    });
+    const noteDateButton = screen.getByRole("button", {
+      name: "Выбрать дедлайн: 18 июня 2026",
+    });
+    const deadlineInput = screen.getByLabelText("Дедлайн");
+
+    expect(beforeNoteDateButton).toBeDisabled();
+    expect(noteDateButton).not.toBeDisabled();
+    expect(deadlineInput).toHaveAttribute("min", "2026-06-18");
+
+    fireEvent.change(deadlineInput, {
+      target: { value: "2026-06-17" },
+    });
+
+    expect(deadlineInput).toHaveValue("");
+  } finally {
+    jest.useRealTimers();
+  }
 });
 
 test("switches calendar month from the month picker", () => {
@@ -731,6 +990,98 @@ test("opens settings and saves theme, week start, and language", () => {
   expect(getAccountStorageValue("theme")).toBe("1");
   expect(getAccountStorageValue("weekStart")).toBe("sunday");
   expect(getAccountStorageValue("language")).toBe("en");
+});
+
+test("migrates the removed black theme to dark", () => {
+  localStorage.setItem("theme", "3");
+
+  renderTodoApp();
+
+  expect(document.documentElement).toHaveClass("darkTheme");
+  expect(getAccountStorageValue("theme")).toBe("1");
+  expect(
+    screen.queryByRole("button", { name: "Выбрать тему black" })
+  ).not.toBeInTheDocument();
+});
+
+test("saves delete after deadline setting", () => {
+  renderTodoApp();
+
+  userEvent.click(screen.getByRole("button", { name: "Открыть настройки" }));
+  userEvent.click(screen.getByRole("button", {
+    name: "Включить удаление после дедлайна",
+  }));
+
+  expect(getAccountStorageValue("deleteAfterDeadline")).toBe("true");
+});
+
+test("removes expired deadline tasks when delete after deadline is enabled", () => {
+  localStorage.setItem(accountStorageKey("deleteAfterDeadline"), "true");
+  localStorage.setItem(
+    accountStorageKey("toDoItems"),
+    JSON.stringify([
+      {
+        id: "expired-task",
+        text: "Старый дедлайн",
+        favorite: false,
+        checked: false,
+        category: "all",
+        deadline: getRelativeDateInputValue(-1),
+        date: "today",
+      },
+      {
+        id: "future-task",
+        text: "Будущий дедлайн",
+        favorite: false,
+        checked: false,
+        category: "all",
+        deadline: getRelativeDateInputValue(1),
+        date: "today",
+      },
+    ])
+  );
+
+  renderTodoApp();
+
+  expect(screen.queryByText("Старый дедлайн")).not.toBeInTheDocument();
+  expect(screen.getByText("Будущий дедлайн")).toBeInTheDocument();
+  expect(getAccountJsonValue("toDoItems")).toEqual([
+    expect.objectContaining({ text: "Будущий дедлайн" }),
+  ]);
+});
+
+test("removes a deadline task when its deadline passes while the app is open", () => {
+  jest.useFakeTimers("modern");
+  jest.setSystemTime(new Date(2026, 5, 16, 12, 0, 0));
+  try {
+    localStorage.setItem(accountStorageKey("deleteAfterDeadline"), "true");
+    localStorage.setItem(
+      accountStorageKey("toDoItems"),
+      JSON.stringify([
+        {
+          id: "soon-expired-task",
+          text: "Скоро удалить",
+          favorite: false,
+          checked: false,
+          category: "all",
+          deadline: "2026-06-16T12:01",
+          date: "today",
+        },
+      ])
+    );
+
+    renderTodoApp();
+
+    expect(screen.getByText("Скоро удалить")).toBeInTheDocument();
+
+    act(() => {
+      jest.advanceTimersByTime(60000);
+    });
+
+    expect(screen.queryByText("Скоро удалить")).not.toBeInTheDocument();
+  } finally {
+    jest.useRealTimers();
+  }
 });
 
 test("uses device language and color scheme for a new account", () => {
@@ -1624,6 +1975,186 @@ test("edits a note category from the composer", () => {
       category: "work",
     }),
   ]);
+});
+
+test("warns when editing a note deadline before its scheduled time", () => {
+  jest.useFakeTimers("modern");
+  jest.setSystemTime(new Date(2026, 5, 16, 9, 0, 0));
+  try {
+    localStorage.setItem(
+      "toDoItems",
+      JSON.stringify([
+        {
+          id: "future-edit-task",
+          text: "Редактируемая заметка",
+          favorite: false,
+          checked: false,
+          category: "all",
+          createdAt: "2026-06-16",
+          scheduledAt: "2026-06-18T10:00",
+          date: "16.06.2026 09:00:00",
+        },
+      ])
+    );
+
+    renderTodoApp();
+
+    userEvent.click(
+      within(screen.getByTestId("todo-item-Редактируемая заметка")).getByRole(
+        "button",
+        { name: "Редактировать" }
+      )
+    );
+    userEvent.click(screen.getByRole("button", { name: "Выбрать дедлайн" }));
+    fireEvent.change(screen.getByLabelText("Дедлайн"), {
+      target: { value: "2026-06-18" },
+    });
+    fireEvent.change(screen.getByLabelText("Время дедлайна"), {
+      target: { value: "09:30" },
+    });
+    userEvent.click(screen.getByRole("button", { name: "Сохранить заметку" }));
+
+    expect(screen.getByText("Дедлайн раньше даты заметки")).toBeInTheDocument();
+    expect(getAccountJsonValue("toDoItems")[0]).toEqual(
+      expect.objectContaining({
+        text: "Редактируемая заметка",
+        scheduledAt: "2026-06-18T10:00",
+      })
+    );
+    expect(getAccountJsonValue("toDoItems")[0].deadline).toBeUndefined();
+  } finally {
+    jest.useRealTimers();
+  }
+});
+
+test("warns when saving an invalid edited deadline with Enter", () => {
+  jest.useFakeTimers("modern");
+  jest.setSystemTime(new Date(2026, 5, 16, 9, 0, 0));
+  try {
+    localStorage.setItem(
+      "toDoItems",
+      JSON.stringify([
+        {
+          id: "future-enter-edit-task",
+          text: "Редактируемая через Enter",
+          favorite: false,
+          checked: false,
+          category: "all",
+          createdAt: "2026-06-16",
+          scheduledAt: "2026-06-18T10:00",
+          date: "16.06.2026 09:00:00",
+        },
+      ])
+    );
+
+    renderTodoApp();
+
+    userEvent.click(
+      within(screen.getByTestId("todo-item-Редактируемая через Enter")).getByRole(
+        "button",
+        { name: "Редактировать" }
+      )
+    );
+    userEvent.click(screen.getByRole("button", { name: "Выбрать дедлайн" }));
+    fireEvent.change(screen.getByLabelText("Дедлайн"), {
+      target: { value: "2026-06-18" },
+    });
+    fireEvent.change(screen.getByLabelText("Время дедлайна"), {
+      target: { value: "09:30" },
+    });
+    fireEvent.keyDown(window, { key: "Enter" });
+
+    expect(screen.getByText("Дедлайн раньше даты заметки")).toBeInTheDocument();
+    expect(getAccountJsonValue("toDoItems")[0]).toEqual(
+      expect.objectContaining({
+        text: "Редактируемая через Enter",
+        scheduledAt: "2026-06-18T10:00",
+      })
+    );
+    expect(getAccountJsonValue("toDoItems")[0].deadline).toBeUndefined();
+  } finally {
+    jest.useRealTimers();
+  }
+});
+
+test("prefills the scheduled note time while editing", () => {
+  localStorage.setItem(
+    "toDoItems",
+    JSON.stringify([
+      {
+        id: "scheduled-edit-task",
+        text: "Заметка со временем",
+        favorite: false,
+        checked: false,
+        category: "all",
+        createdAt: "2026-06-16",
+        scheduledAt: "2026-06-18T10:20",
+        date: "16.06.2026 09:00:00",
+      },
+    ])
+  );
+  renderTodoApp();
+
+  userEvent.click(
+    within(screen.getByTestId("todo-item-Заметка со временем")).getByRole(
+      "button",
+      { name: "Редактировать" }
+    )
+  );
+
+  expect(screen.getByText("Дата: 18 июня")).toBeInTheDocument();
+  const scheduledTimeInput = screen.getByLabelText("Время заметки");
+  expect(scheduledTimeInput).toHaveValue("10:20");
+
+  fireEvent.change(scheduledTimeInput, {
+    target: { value: "11:05" },
+  });
+  userEvent.click(screen.getByRole("button", { name: "Сохранить заметку" }));
+
+  expect(getAccountJsonValue("toDoItems")[0]).toEqual(
+    expect.objectContaining({
+      scheduledAt: "2026-06-18T11:05",
+    })
+  );
+});
+
+test("keeps the scheduled note time when saving an edit with Enter", () => {
+  localStorage.setItem(
+    "toDoItems",
+    JSON.stringify([
+      {
+        id: "scheduled-enter-edit-task",
+        text: "Заметка через Enter",
+        favorite: false,
+        checked: false,
+        category: "all",
+        createdAt: "2026-06-16",
+        scheduledAt: "2026-06-18T10:20",
+        date: "16.06.2026 09:00:00",
+      },
+    ])
+  );
+  renderTodoApp();
+
+  userEvent.click(
+    within(screen.getByTestId("todo-item-Заметка через Enter")).getByRole(
+      "button",
+      { name: "Редактировать" }
+    )
+  );
+
+  expect(screen.getByLabelText("Время заметки")).toHaveValue("10:20");
+
+  fireEvent.change(screen.getByLabelText("Время заметки"), {
+    target: { value: "11:05" },
+  });
+  fireEvent.keyDown(window, { key: "Enter" });
+
+  expect(getAccountJsonValue("toDoItems")[0]).toEqual(
+    expect.objectContaining({
+      scheduledAt: "2026-06-18T11:05",
+    })
+  );
 });
 
 test("uses the edited note category as the composer category draft", () => {

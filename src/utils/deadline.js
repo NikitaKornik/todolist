@@ -1,12 +1,3 @@
-export const DEADLINE_FILTERS = [
-  { id: "all", name: "Все" },
-  { id: "today", name: "Сегодня" },
-  { id: "tomorrow", name: "Завтра" },
-  { id: "week", name: "Неделя" },
-  { id: "overdue", name: "Просрочено" },
-  { id: "noDate", name: "Без даты" },
-];
-
 export function getDeadlineDate(deadline) {
   return deadline ? String(deadline).split("T")[0] : "";
 }
@@ -35,6 +26,48 @@ function parseDateInputValue(value) {
   }
 
   return new Date(year, month - 1, day);
+}
+
+export function isDeadlineExpired(deadline, now = new Date()) {
+  const expirationTime = getDeadlineExpirationTime(deadline);
+
+  if (expirationTime === null) {
+    return false;
+  }
+
+  return expirationTime <= now.getTime();
+}
+
+export function getDeadlineExpirationTime(deadline) {
+  const date = parseDateInputValue(deadline);
+
+  if (!date) {
+    return null;
+  }
+
+  const time = getDeadlineTime(deadline);
+
+  if (time) {
+    const [hours, minutes] = time.split(":").map(Number);
+
+    if (Number.isNaN(hours) || Number.isNaN(minutes)) {
+      return null;
+    }
+
+    return new Date(
+      date.getFullYear(),
+      date.getMonth(),
+      date.getDate(),
+      hours,
+      minutes
+    ).getTime();
+  }
+
+  return new Date(
+    date.getFullYear(),
+    date.getMonth(),
+    date.getDate() + 1
+  ).getTime();
 }
 
 function getDayDiff(dateValue, today = new Date()) {
@@ -88,42 +121,4 @@ export function formatDeadline(
     month: "2-digit",
     year: "numeric",
   })}${timeSuffix}`;
-}
-
-export function isDeadlineInFilter(deadline, filter, customDate, today = new Date()) {
-  if (filter === "all") {
-    return true;
-  }
-
-  if (filter === "date") {
-    return Boolean(deadline) && getDeadlineDate(deadline) === customDate;
-  }
-
-  if (filter === "noDate") {
-    return !deadline;
-  }
-
-  const diff = getDayDiff(deadline, today);
-
-  if (diff === null) {
-    return false;
-  }
-
-  if (filter === "today") {
-    return diff === 0;
-  }
-
-  if (filter === "tomorrow") {
-    return diff === 1;
-  }
-
-  if (filter === "week") {
-    return diff >= 0 && diff <= 6;
-  }
-
-  if (filter === "overdue") {
-    return diff < 0;
-  }
-
-  return true;
 }

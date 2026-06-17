@@ -217,6 +217,11 @@ function App() {
         event.preventDefault();
         deleteCompletedItems({ itemIds: popup.itemIds });
       }
+
+      if (event.key === "Enter" && popup.type === "deadlineWarning") {
+        event.preventDefault();
+        setPopup(null);
+      }
     }
 
     window.addEventListener("keydown", handlePopupKeyDown);
@@ -331,6 +336,26 @@ function App() {
                     onClick={() => setPopup(null)}
                   >
                     {t("actions.cancel")}
+                  </Btn>
+                </div>
+              </>
+            )}
+            {popup.type === "deadlineWarning" && (
+              <>
+                <h3 className={s.popupTitle}>
+                  {t("popup.deadlineBeforeScheduledTitle")}
+                </h3>
+                <div className={s.popupDesc}>
+                  {t("popup.deadlineBeforeScheduledDescription")}
+                </div>
+                <div className={s.popupBtns}>
+                  <Btn
+                    className={s.popupSecondaryAction}
+                    variant="ghost"
+                    ariaLabel={t("popup.closeNotification")}
+                    onClick={() => setPopup(null)}
+                  >
+                    {t("popup.closeNotification")}
                   </Btn>
                 </div>
               </>

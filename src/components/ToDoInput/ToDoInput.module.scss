@@ -94,6 +94,7 @@
 .deadlineButton,
 .clearDeadlineButton,
 .createdAtBadge,
+.scheduledTimeControl,
 .categoryControl {
   height: 30px;
   border: 1px solid var(--theme-30);
@@ -102,6 +103,37 @@
   color: var(--text);
   font-size: 13px;
   white-space: nowrap;
+}
+
+.scheduledTimeControl {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 192px;
+  padding: 0 8px;
+  color: var(--theme-10);
+
+  & input {
+    width: 48px;
+    border: 0;
+    appearance: none;
+    -webkit-appearance: none;
+    background: transparent;
+    color: var(--text);
+    font: inherit;
+    outline: none;
+  }
+
+  & input::-webkit-calendar-picker-indicator {
+    display: none;
+  }
+}
+
+.scheduledTimeInput {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
 }
 
 .createdAtBadge {

@@ -9,8 +9,14 @@ import s from "./SettingsView.module.scss";
 
 const SettingsView = memo(() => {
   const { themesData, theme, setTheme } = useContext(ThemesToDoContext);
-  const { language, setLanguage, weekStart, setWeekStart } =
-    useContext(SettingsToDoContext);
+  const {
+    deleteAfterDeadline,
+    language,
+    setDeleteAfterDeadline,
+    setLanguage,
+    weekStart,
+    setWeekStart,
+  } = useContext(SettingsToDoContext);
   const { t } = useI18n();
   const weekStartOptions = [
     {
@@ -34,6 +40,18 @@ const SettingsView = memo(() => {
       value: "en",
       label: t("settings.languageEn"),
       ariaLabel: t("settings.selectEnglish"),
+    },
+  ];
+  const deleteAfterDeadlineOptions = [
+    {
+      value: "off",
+      label: t("settings.deleteAfterDeadlineOff"),
+      ariaLabel: t("settings.disableDeleteAfterDeadline"),
+    },
+    {
+      value: "on",
+      label: t("settings.deleteAfterDeadlineOn"),
+      ariaLabel: t("settings.enableDeleteAfterDeadline"),
     },
   ];
 
@@ -89,6 +107,19 @@ const SettingsView = memo(() => {
           options={languageOptions}
           value={language}
           onChange={setLanguage}
+        />
+      </div>
+
+      <div className={s.settingGroup}>
+        <div className={s.settingText}>
+          <h2>{t("settings.deleteAfterDeadline")}</h2>
+        </div>
+        <SegmentedControl
+          ariaLabel={t("settings.deleteAfterDeadline")}
+          className={s.segmented}
+          options={deleteAfterDeadlineOptions}
+          value={deleteAfterDeadline ? "on" : "off"}
+          onChange={(value) => setDeleteAfterDeadline(value === "on")}
         />
       </div>
     </section>

@@ -10,6 +10,7 @@ import React, {
 import { AnimatePresence } from "framer-motion";
 import {
   CategoryToDoContext,
+  FunctionToDoContext,
   InputToDoContext,
   ToDoContext,
   ElementsToDoContext,
@@ -23,7 +24,7 @@ import { ReactComponent as SvgCancel } from "../../image/cancel.svg";
 import { ReactComponent as SvgCheck } from "../../image/check.svg";
 import { ReactComponent as SvgClock } from "../../image/clock.svg";
 import { ReactComponent as SvgAdd } from "../../image/add.svg";
-import { formatCalendarDate } from "../../utils/calendar";
+import { formatCalendarDate, getDateInputValue } from "../../utils/calendar";
 import {
   buildDeadline,
   formatDeadline,
@@ -44,14 +45,6 @@ function clampDeadlineDate(value) {
   return value > MAX_DEADLINE_DATE ? MAX_DEADLINE_DATE : value;
 }
 
-function getDateInputValue(date) {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-
-  return `${year}-${month}-${day}`;
-}
-
 function getComposerReserve(inputHeight) {
   const reserveGap = window.innerWidth <= 560 ? 8 : 12;
   return inputHeight + reserveGap;
@@ -59,21 +52,27 @@ function getComposerReserve(inputHeight) {
 
 const ToDoInput = memo(
   ({
-    createdAt,
+    deadlineMinDate,
+    deadlineMinTime,
     isDeadlineCalendarPicking,
     onDeadlineCalendarPickCancel,
     onDeadlineCalendarPickStart,
     onDeadlinePickerOpenChange,
     onAddItem,
+    scheduledDate,
+    scheduledTime,
+    setScheduledTime,
     textareaRef,
     setTextAreaHeight,
   }) => {
   const inputContainerRef = useRef(null);
+  const deadlineTimeTouchedRef = useRef(false);
   const previousInputOffsetRef = useRef(null);
   const [deadlineOpen, setDeadlineOpen] = useState(false);
   const { focus, popup } = useContext(ToDoContext);
   const { categoryLabel, locale, t } = useI18n();
   const { cancel } = useContext(ElementsToDoContext);
+  const { setPopup } = useContext(FunctionToDoContext);
   const { categoryData } = useContext(CategoryToDoContext);
   const {
     deadline,
@@ -85,6 +84,22 @@ const ToDoInput = memo(
   } = useContext(InputToDoContext);
   const deadlineDate = getDeadlineDate(deadline);
   const deadlineTime = getDeadlineTime(deadline);
+  const now = new Date();
+  const today = getDateInputValue(now);
+  const minDeadlineDate =
+    deadlineMinDate && deadlineMinDate > today ? deadlineMinDate : today;
+  const currentTime = `${String(now.getHours()).padStart(2, "0")}:${String(
+    now.getMinutes()
+  ).padStart(2, "0")}`;
+  const sameDayMinTimes = [deadlineMinTime, currentTime].filter(Boolean).sort();
+  const scheduledMinDeadlineTime =
+    deadlineDate === minDeadlineDate ? deadlineMinTime : undefined;
+  const minDeadlineTime =
+    deadlineDate === today
+      ? sameDayMinTimes[sameDayMinTimes.length - 1]
+      : deadlineDate === minDeadlineDate
+      ? deadlineMinTime
+      : undefined;
 
   const resizeTextarea = useCallback(() => {
     const textarea = textareaRef.current;
@@ -137,8 +152,44 @@ const ToDoInput = memo(
     return () => observer.disconnect();
   }, [updateInputOffset]);
 
+  useEffect(() => {
+    if (!deadline) {
+      deadlineTimeTouchedRef.current = false;
+    }
+  }, [deadline]);
+
+  const showDeadlineBeforeScheduledWarning = useCallback(() => {
+    setPopup({ type: "deadlineWarning" });
+  }, [setPopup]);
+
+  useEffect(() => {
+    if (deadlineDate !== minDeadlineDate || !scheduledMinDeadlineTime) {
+      return;
+    }
+
+    if (!deadlineTime && !deadlineTimeTouchedRef.current) {
+      setDeadline(buildDeadline(deadlineDate, scheduledMinDeadlineTime));
+    }
+  }, [
+    deadlineDate,
+    deadlineTime,
+    minDeadlineDate,
+    scheduledMinDeadlineTime,
+    setDeadline,
+  ]);
+
   function handleAddItem() {
-    onAddItem({ createdAt });
+    if (
+      deadlineDate === minDeadlineDate &&
+      deadlineTime &&
+      minDeadlineTime &&
+      deadlineTime < minDeadlineTime
+    ) {
+      showDeadlineBeforeScheduledWarning();
+      return;
+    }
+
+    onAddItem();
     setDeadlineOpen(false);
     onDeadlinePickerOpenChange?.(false);
     onDeadlineCalendarPickCancel?.();
@@ -163,16 +214,65 @@ const ToDoInput = memo(
   function setRelativeDeadline(dayOffset) {
     const date = new Date();
     date.setDate(date.getDate() + dayOffset);
-    setDeadline(buildDeadline(getDateInputValue(date), deadlineTime));
+    const relativeDateValue = getDateInputValue(date);
+    const dateValue =
+      relativeDateValue < minDeadlineDate ? minDeadlineDate : relativeDateValue;
+    const nextDeadline = buildDeadline(dateValue, deadlineTime);
+
+    if (
+      nextDeadline &&
+      dateValue === minDeadlineDate &&
+      deadlineTime &&
+      deadlineMinTime &&
+      deadlineTime < deadlineMinTime
+    ) {
+      setDeadline(nextDeadline);
+      return;
+    }
+
+    setDeadline(nextDeadline);
   }
 
   function setDeadlineDate(value) {
-    setDeadline(buildDeadline(clampDeadlineDate(value), deadlineTime));
+    const nextDate = clampDeadlineDate(value);
+    const nextDeadline = buildDeadline(nextDate, deadlineTime);
+
+    if (nextDate && nextDate < minDeadlineDate) {
+      return;
+    }
+
+    if (
+      nextDeadline &&
+      nextDate === minDeadlineDate &&
+      deadlineTime &&
+      deadlineMinTime &&
+      deadlineTime < deadlineMinTime
+    ) {
+      setDeadline(nextDeadline);
+      return;
+    }
+
+    setDeadline(nextDeadline);
   }
 
   function setDeadlineTime(value) {
-    const date = deadlineDate || getDateInputValue(new Date());
-    setDeadline(buildDeadline(date, value));
+    deadlineTimeTouchedRef.current = true;
+
+    const date = deadlineDate || minDeadlineDate;
+    const nextDeadline = buildDeadline(date, value);
+
+    if (
+      nextDeadline &&
+      date === minDeadlineDate &&
+      value &&
+      deadlineMinTime &&
+      value < deadlineMinTime
+    ) {
+      setDeadline(nextDeadline);
+      return;
+    }
+
+    setDeadline(nextDeadline);
   }
 
   return (
@@ -205,14 +305,30 @@ const ToDoInput = memo(
                 />
               </div>
             )}
-            {createdAt && (
+            {scheduledDate && (
               <span className={s.createdAtBadge}>
                 {t("todo.date")}: {formatCalendarDate(
-                  createdAt,
+                  scheduledDate,
                   { year: undefined },
                   locale
                 )}
               </span>
+            )}
+            {scheduledDate && (
+              <label className={s.scheduledTimeControl}>
+                <span>{t("todo.scheduledTime")}</span>
+                <span className={s.scheduledTimeInput}>
+                  <input
+                    aria-label={t("todo.scheduledTime")}
+                    type="time"
+                    value={scheduledTime}
+                    onChange={(event) => setScheduledTime?.(event.target.value)}
+                  />
+                  <span className={s.deadlineFieldIcon} aria-hidden="true">
+                    <SvgClock />
+                  </span>
+                </span>
+              </label>
             )}
             <span
               className={[
@@ -251,7 +367,10 @@ const ToDoInput = memo(
                   })}
                   className={s.clearDeadlineButton}
                   type="button"
-                  onClick={() => setDeadline("")}
+                  onClick={() => {
+                    deadlineTimeTouchedRef.current = false;
+                    setDeadline("");
+                  }}
                 >
                   {t("actions.clear")}
                 </button>
@@ -304,6 +423,7 @@ const ToDoInput = memo(
                   <input
                     aria-label={t("deadline.label")}
                     max={MAX_DEADLINE_DATE}
+                    min={minDeadlineDate}
                     type="date"
                     value={deadlineDate}
                     onChange={(event) => setDeadlineDate(event.target.value)}

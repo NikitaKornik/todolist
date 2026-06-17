@@ -105,15 +105,11 @@
 }
 
 .darkTheme {
-  background: linear-gradient(135deg, #20242c 0%, #5b6573 100%);
+  background: linear-gradient(135deg, #050505 0%, #343434 100%);
 }
 
 .blueTheme {
   background: linear-gradient(135deg, #dcecff 0%, #3774c2 100%);
-}
-
-.blackTheme {
-  background: linear-gradient(135deg, #050505 0%, #343434 100%);
 }
 
 @media (max-width: 700px) {

@@ -114,6 +114,7 @@ const translations = {
       viewMode: "Режим отображения",
     },
     popup: {
+      closeNotification: "Понятно",
       deleteCategoryConfirm: "Подтвердить удаление категории",
       deleteCompletedConfirm: "Подтвердить удаление выполненных",
       deleteCompletedDescription:
@@ -124,10 +125,18 @@ const translations = {
       deleteDescription:
         "Удалив элемент, вы больше не можете его восстановить.",
       deleteTitle: "Вы точно хотите удалить этот элемент?",
+      deadlineBeforeScheduledDescription:
+        "Дедлайн не может быть раньше выбранной даты и времени заметки. Исправьте дату или время дедлайна.",
+      deadlineBeforeScheduledTitle: "Дедлайн раньше даты заметки",
       cancelDelete: "Отменить удаление",
     },
     settings: {
       aria: "Страница настроек",
+      deleteAfterDeadline: "Удалять после дедлайна",
+      deleteAfterDeadlineOff: "Выкл",
+      deleteAfterDeadlineOn: "Вкл",
+      disableDeleteAfterDeadline: "Отключить удаление после дедлайна",
+      enableDeleteAfterDeadline: "Включить удаление после дедлайна",
       language: "Язык",
       languageEn: "English",
       languageRu: "Русский",
@@ -148,6 +157,7 @@ const translations = {
       addToFavorite: "Добавить в избранное",
       cancelEdit: "Отменить редактирование",
       closeEdit: "Закрыть редактирование элемента",
+      created: "Добавлено",
       date: "Дата",
       delete: "Удалить",
       edit: "Редактировать",
@@ -155,6 +165,7 @@ const translations = {
       noSearchResults: "Ничего не найдено",
       removeFromFavorite: "Убрать из избранного",
       save: "Сохранить заметку",
+      scheduledTime: "Время заметки",
       text: "Текст заметки",
       textPlaceholder: "Введите текст...",
       unmarkDone: "Снять отметку",
@@ -267,6 +278,7 @@ const translations = {
       viewMode: "View mode",
     },
     popup: {
+      closeNotification: "Got it",
       deleteCategoryConfirm: "Confirm category deletion",
       deleteCompletedConfirm: "Confirm completed deletion",
       deleteCompletedDescription:
@@ -276,10 +288,18 @@ const translations = {
       deleteConfirm: "Confirm deletion",
       deleteDescription: "After deleting this item, you cannot restore it.",
       deleteTitle: "Are you sure you want to delete this item?",
+      deadlineBeforeScheduledDescription:
+        "The deadline cannot be earlier than the selected note date and time. Please adjust the deadline date or time.",
+      deadlineBeforeScheduledTitle: "Deadline is before the note date",
       cancelDelete: "Cancel deletion",
     },
     settings: {
       aria: "Settings page",
+      deleteAfterDeadline: "Delete after deadline",
+      deleteAfterDeadlineOff: "Off",
+      deleteAfterDeadlineOn: "On",
+      disableDeleteAfterDeadline: "Disable delete after deadline",
+      enableDeleteAfterDeadline: "Enable delete after deadline",
       language: "Language",
       languageEn: "English",
       languageRu: "Russian",
@@ -300,6 +320,7 @@ const translations = {
       addToFavorite: "Add to favorites",
       cancelEdit: "Cancel editing",
       closeEdit: "Close item editing",
+      created: "Added",
       date: "Date",
       delete: "Delete",
       edit: "Edit",
@@ -307,6 +328,7 @@ const translations = {
       noSearchResults: "Nothing found",
       removeFromFavorite: "Remove from favorites",
       save: "Save note",
+      scheduledTime: "Note time",
       text: "Note text",
       textPlaceholder: "Enter text...",
       unmarkDone: "Unmark completed",

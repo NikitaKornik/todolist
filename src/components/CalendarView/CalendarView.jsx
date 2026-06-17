@@ -14,6 +14,7 @@ import {
   getDateInputValue,
   getMonthDays,
   getRelativeMonth,
+  getScheduledDate,
   parseInputDate,
   parseTodoCreatedDate,
 } from "../../utils/calendar";
@@ -24,6 +25,7 @@ import { ReactComponent as SvgArrowLeft } from "../../image/arrow-left.svg";
 import { ReactComponent as SvgArrowRight } from "../../image/arrow-right.svg";
 import { ReactComponent as SvgDelete } from "../../image/delete.svg";
 import { useI18n } from "../../i18n/i18n";
+import { isCoarsePointerDevice } from "../../utils/pointer";
 import s from "./CalendarView.module.scss";
 
 const YEAR_PICKER_SIZE = 12;
@@ -57,13 +59,6 @@ const calendarTransitionVariants = {
 const TOUCH_DRAG_DELAY = 500;
 const TOUCH_SCROLL_THRESHOLD = 8;
 
-function isCoarsePointerDevice() {
-  return (
-    typeof window.matchMedia === "function" &&
-    Boolean(window.matchMedia("(pointer: coarse)")?.matches)
-  );
-}
-
 const CalendarView = memo(
   ({
     items,
@@ -75,6 +70,7 @@ const CalendarView = memo(
     onDeleteCompletedDay,
     onReorderItems,
     isDeadlinePicking,
+    deadlineMinDate,
     onDateClick,
     searchQuery,
     selectedDeadlineDate,
@@ -149,7 +145,10 @@ const CalendarView = memo(
           return dates;
         }
 
-        const createdDate = item.createdAt || parseTodoCreatedDate(item.date);
+        const createdDate =
+          getScheduledDate(item.scheduledAt) ||
+          item.createdAt ||
+          parseTodoCreatedDate(item.date);
         const deadlineDate = getDeadlineDate(item.deadline);
 
         if (createdDate) {
@@ -166,7 +165,10 @@ const CalendarView = memo(
 
     const calendarStats = useMemo(() => {
       return items.reduce((stats, item) => {
-        const createdDate = item.createdAt || parseTodoCreatedDate(item.date);
+        const createdDate =
+          getScheduledDate(item.scheduledAt) ||
+          item.createdAt ||
+          parseTodoCreatedDate(item.date);
 
         if (createdDate) {
           const dayStats = stats.get(createdDate) || { created: 0, deadlines: 0 };
@@ -191,7 +193,9 @@ const CalendarView = memo(
         sortItemsByPriority(
           items.filter(
             (item) =>
-              (item.createdAt || parseTodoCreatedDate(item.date)) === selectedDate
+              (getScheduledDate(item.scheduledAt) ||
+                item.createdAt ||
+                parseTodoCreatedDate(item.date)) === selectedDate
           )
         ),
       [items, selectedDate]
@@ -641,6 +645,7 @@ const CalendarView = memo(
           checked={item.checked}
           date={item.date}
           deadline={item.deadline}
+          scheduledAt={item.scheduledAt}
           draggable={canDragItems}
           favorite={item.favorite}
           focus={focus}
@@ -784,10 +789,14 @@ const CalendarView = memo(
                         : t("calendar.openDay", { date: formattedDay });
                       const hasEvents = stats.created > 0 || stats.deadlines > 0;
                       const hasSearchMatch = searchMatchDates.has(day.value);
+                      const minDeadlineDate = deadlineMinDate || today;
+                      const isPastDeadlineDay =
+                        isDeadlinePicking && day.value < minDeadlineDate;
 
                       return (
                         <button
                           aria-label={label}
+                          aria-disabled={isPastDeadlineDay}
                           className={[
                             s.dayCell,
                             day.inCurrentMonth ? "" : s.outsideMonth,
@@ -798,9 +807,11 @@ const CalendarView = memo(
                               : "",
                             hasSearchMatch ? s.searchMatchDay : "",
                             isDeadlinePicking ? s.deadlinePickMode : "",
+                            isPastDeadlineDay ? s.pastDeadlineDay : "",
                           ]
                             .filter(Boolean)
                             .join(" ")}
+                          disabled={isPastDeadlineDay}
                           key={day.value}
                           type="button"
                           onClick={() => onDateClick(day.value)}

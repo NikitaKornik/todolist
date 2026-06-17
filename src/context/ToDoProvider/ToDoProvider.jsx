@@ -6,7 +6,20 @@ import React, {
   useState,
 } from "react";
 import { v4 as uuidv4 } from "uuid";
-import { getDateInputValue, parseInputDate } from "../../utils/calendar";
+import {
+  getDateInputValue,
+  getScheduledDate,
+  parseInputDate,
+  parseTodoCreatedDate,
+} from "../../utils/calendar";
+import {
+  getPreferredLanguage,
+  getPreferredTheme,
+} from "../../utils/systemPreferences";
+import {
+  getDeadlineExpirationTime,
+  isDeadlineExpired,
+} from "../../utils/deadline";
 
 export const ToDoContext = createContext(null);
 export const FunctionToDoContext = createContext(null);
@@ -43,12 +56,9 @@ const themesData = [
     name: "blue",
     id: 2,
   },
-  {
-    class: "blackTheme",
-    name: "black",
-    id: 3,
-  },
 ];
+
+const REMOVED_BLACK_THEME_ID = 3;
 
 const categoryData = [
   {
@@ -58,6 +68,16 @@ const categoryData = [
     deletable: false,
   },
 ];
+
+function normalizeThemeId(value) {
+  const themeId = Number(value);
+
+  if (themeId === REMOVED_BLACK_THEME_ID) {
+    return 1;
+  }
+
+  return themesData.some((themeItem) => themeItem.id === themeId) ? themeId : 0;
+}
 
 function normalizeCategory(categoryItem, index) {
   return {
@@ -116,18 +136,8 @@ function readAccountString(accountId, key, fallback) {
   return localStorage.getItem(getAccountStorageKey(accountId, key)) || fallback;
 }
 
-function getPreferredLanguage() {
-  const deviceLanguage = navigator.language || navigator.languages?.[0] || "";
-
-  return deviceLanguage.toLowerCase().startsWith("ru") ? "ru" : "en";
-}
-
-function getPreferredTheme() {
-  if (typeof window.matchMedia !== "function") {
-    return 0;
-  }
-
-  return window.matchMedia("(prefers-color-scheme: dark)").matches ? 1 : 0;
+function readAccountBoolean(accountId, key, fallback = false) {
+  return readAccountString(accountId, key, String(fallback)) === "true";
 }
 
 function writeAccountValue(accountId, key, value) {
@@ -151,20 +161,34 @@ function normalizeUsername(username) {
 }
 
 function normalizeToDoItem(item) {
-  if (!item || item.category || !item.profile) {
+  if (!item) {
     return item;
   }
 
   const { profile, ...rest } = item;
+  const category = item.category || profile;
+  const fallbackDate =
+    parseTodoCreatedDate(item.date) ||
+    getScheduledDate(item.createdAt) ||
+    getDateInputValue(new Date());
 
   return {
     ...rest,
-    category: profile,
+    category,
+    createdAt: getScheduledDate(item.createdAt) || fallbackDate,
+    scheduledAt: item.scheduledAt || item.createdAt || fallbackDate,
   };
 }
 
 function migrateLegacyStorageToAccount(accountId) {
-  ["toDoItems", CATEGORIES_STORAGE_KEY, "theme", "weekStart", "language"].forEach((key) => {
+  [
+    "toDoItems",
+    CATEGORIES_STORAGE_KEY,
+    "theme",
+    "weekStart",
+    "language",
+    "deleteAfterDeadline",
+  ].forEach((key) => {
     const legacyValue = localStorage.getItem(key);
     const accountKey = getAccountStorageKey(accountId, key);
 
@@ -200,6 +224,13 @@ function ToDoProvider({ children }) {
   const [weekStart, setWeekStart] = useState(
     () => readAccountString(localStorage.getItem(CURRENT_ACCOUNT_STORAGE_KEY), "weekStart", "monday")
   );
+  const [deleteAfterDeadline, setDeleteAfterDeadline] = useState(
+    () => readAccountBoolean(
+      localStorage.getItem(CURRENT_ACCOUNT_STORAGE_KEY),
+      "deleteAfterDeadline",
+      false
+    )
+  );
   const [language, setLanguage] = useState(
     () => readAccountString(
       localStorage.getItem(CURRENT_ACCOUNT_STORAGE_KEY),
@@ -224,7 +255,7 @@ function ToDoProvider({ children }) {
   });
 
   const [theme, setTheme] = useState(() =>
-    Number(readAccountString(
+    normalizeThemeId(readAccountString(
       localStorage.getItem(CURRENT_ACCOUNT_STORAGE_KEY),
       "theme",
       String(getPreferredTheme())
@@ -238,6 +269,18 @@ function ToDoProvider({ children }) {
     () => accounts.find((account) => account.id === currentAccountId) || null,
     [accounts, currentAccountId]
   );
+
+  const resetComposerState = useCallback(() => {
+    setInput("");
+    setInputCache("");
+    setDeadline("");
+    setDeadlineCache("");
+    setFocus("");
+    setPopup(null);
+    setCategory(0);
+    setDraftCategory(0);
+    setDraftCategoryCache(0);
+  }, []);
 
   const getDate = useCallback((createdAt) => {
     const time = new Date().toLocaleTimeString();
@@ -255,15 +298,7 @@ function ToDoProvider({ children }) {
   }, [language]);
 
   const loadAccountData = useCallback((accountId) => {
-    setInput("");
-    setInputCache("");
-    setDeadline("");
-    setDeadlineCache("");
-    setFocus("");
-    setPopup(null);
-    setCategory(0);
-    setDraftCategory(0);
-    setDraftCategoryCache(0);
+    resetComposerState();
     setCustomCategories(
       readAccountJsonWithLegacy(
         accountId,
@@ -273,10 +308,11 @@ function ToDoProvider({ children }) {
       ).map(normalizeCategory)
     );
     setToDoItems(readAccountJson(accountId, "toDoItems", []).map(normalizeToDoItem));
-    setTheme(Number(readAccountString(accountId, "theme", String(getPreferredTheme()))));
+    setTheme(normalizeThemeId(readAccountString(accountId, "theme", String(getPreferredTheme()))));
     setWeekStart(readAccountString(accountId, "weekStart", "monday"));
+    setDeleteAfterDeadline(readAccountBoolean(accountId, "deleteAfterDeadline", false));
     setLanguage(readAccountString(accountId, "language", getPreferredLanguage()));
-  }, []);
+  }, [resetComposerState]);
 
   const switchAccount = useCallback(
     (accountId) => {
@@ -340,23 +376,16 @@ function ToDoProvider({ children }) {
   );
 
   const signOut = useCallback(() => {
-    setInput("");
-    setInputCache("");
-    setDeadline("");
-    setDeadlineCache("");
-    setFocus("");
-    setPopup(null);
-    setCategory(0);
-    setDraftCategory(0);
-    setDraftCategoryCache(0);
+    resetComposerState();
     setCustomCategories([]);
     setToDoItems([]);
-    setTheme(getPreferredTheme());
+    setTheme(normalizeThemeId(getPreferredTheme()));
     setWeekStart("monday");
+    setDeleteAfterDeadline(false);
     setLanguage(getPreferredLanguage());
     setCurrentAccountId("");
     localStorage.removeItem(CURRENT_ACCOUNT_STORAGE_KEY);
-  }, []);
+  }, [resetComposerState]);
 
   useEffect(() => {
     localStorage.setItem(ACCOUNTS_STORAGE_KEY, JSON.stringify(accounts));
@@ -396,8 +425,48 @@ function ToDoProvider({ children }) {
   }, [currentAccountId, weekStart]);
 
   useEffect(() => {
+    writeAccountValue(
+      currentAccountId,
+      "deleteAfterDeadline",
+      String(deleteAfterDeadline)
+    );
+  }, [currentAccountId, deleteAfterDeadline]);
+
+  useEffect(() => {
     writeAccountValue(currentAccountId, "language", language);
   }, [currentAccountId, language]);
+
+  useEffect(() => {
+    if (!deleteAfterDeadline) {
+      return undefined;
+    }
+
+    const removeExpiredItems = () => setToDoItems((prev) => {
+      const nextItems = prev.filter((item) => !isDeadlineExpired(item.deadline));
+
+      return nextItems.length === prev.length ? prev : nextItems;
+    });
+
+    removeExpiredItems();
+
+    const now = Date.now();
+    const nextExpirationTime = Math.min(
+      ...toDoItems
+        .map((item) => getDeadlineExpirationTime(item.deadline))
+        .filter((time) => time !== null && time > now)
+    );
+
+    if (!Number.isFinite(nextExpirationTime)) {
+      return undefined;
+    }
+
+    const timeoutId = window.setTimeout(
+      removeExpiredItems,
+      Math.max(0, nextExpirationTime - now)
+    );
+
+    return () => window.clearTimeout(timeoutId);
+  }, [deleteAfterDeadline, toDoItems]);
 
   const addCategory = useCallback(
     (categoryName, options = {}) => {
@@ -432,6 +501,16 @@ function ToDoProvider({ children }) {
     },
     [allCategories]
   );
+
+  const cancel = useCallback(() => {
+    setInput(inputCache);
+    setInputCache("");
+    setDeadline(deadlineCache);
+    setDeadlineCache("");
+    setDraftCategory(draftCategoryCache);
+    setDraftCategoryCache(0);
+    setFocus("");
+  }, [deadlineCache, draftCategoryCache, inputCache]);
 
   const deleteCategory = useCallback(
     (categoryId, options = {}) => {
@@ -468,21 +547,13 @@ function ToDoProvider({ children }) {
       const focusedItem = toDoItems.find((item) => item.id === focus);
 
       if (focusedItem?.category === categoryToDelete.name) {
-        setFocus("");
-        setInput(inputCache);
-        setInputCache("");
-        setDeadline(deadlineCache);
-        setDeadlineCache("");
-        setDraftCategory(draftCategoryCache);
-        setDraftCategoryCache(0);
+        cancel();
       }
     },
     [
+      cancel,
       customCategories,
-      deadlineCache,
-      draftCategoryCache,
       focus,
-      inputCache,
       category,
       toDoItems,
     ]
@@ -496,7 +567,8 @@ function ToDoProvider({ children }) {
     if (focus === "") {
       const selectedCategory =
         allCategories.find((item) => item.id === category) || categoryData[0];
-      const createdAt = options.createdAt || getDateInputValue(new Date());
+      const createdAt = getDateInputValue(new Date());
+      const scheduledAt = options.scheduledAt || createdAt;
 
       setToDoItems((prev) => [
         ...prev,
@@ -507,6 +579,7 @@ function ToDoProvider({ children }) {
           checked: false,
           category: selectedCategory.name,
           deadline,
+          scheduledAt,
           createdAt,
           date: getDate(createdAt),
         },
@@ -525,28 +598,21 @@ function ToDoProvider({ children }) {
                 text: input,
                 deadline,
                 category: selectedDraftCategory.name,
+                scheduledAt: options.scheduledAt || item.scheduledAt,
               }
             : item
         )
       );
     }
-    setInput(inputCache);
-    setInputCache("");
-    setDeadline(deadlineCache);
-    setDeadlineCache("");
-    setDraftCategory(draftCategoryCache);
-    setDraftCategoryCache(0);
-    setFocus("");
+    cancel();
     return true;
   }, [
     allCategories,
+    cancel,
     deadline,
-    deadlineCache,
     draftCategory,
-    draftCategoryCache,
     focus,
     input,
-    inputCache,
     category,
     getDate,
   ]);
@@ -556,16 +622,10 @@ function ToDoProvider({ children }) {
       setToDoItems((prev) => prev.filter((item) => item.id !== idItem));
       setPopup(null);
       if (idItem === focus) {
-        setFocus("");
-        setInput(inputCache);
-        setInputCache("");
-        setDeadline(deadlineCache);
-        setDeadlineCache("");
-        setDraftCategory(draftCategoryCache);
-        setDraftCategoryCache(0);
+        cancel();
       }
     },
-    [deadlineCache, draftCategoryCache, focus, inputCache]
+    [cancel, focus]
   );
 
   const deleteCompletedItems = useCallback((options = {}) => {
@@ -577,19 +637,13 @@ function ToDoProvider({ children }) {
         item.checked && (!itemIds || itemIds.has(item.id));
 
       if (focusedItem && shouldDeleteItem(focusedItem)) {
-        setFocus("");
-        setInput(inputCache);
-        setInputCache("");
-        setDeadline(deadlineCache);
-        setDeadlineCache("");
-        setDraftCategory(draftCategoryCache);
-        setDraftCategoryCache(0);
+        cancel();
       }
 
       return prev.filter((item) => !shouldDeleteItem(item));
     });
     setPopup(null);
-  }, [deadlineCache, draftCategoryCache, focus, inputCache]);
+  }, [cancel, focus]);
 
   const requestDeleteCompletedItems = useCallback((options = {}) => {
     const itemIds = options.itemIds ? new Set(options.itemIds) : null;
@@ -653,16 +707,6 @@ function ToDoProvider({ children }) {
     },
     [allCategories, deadline, draftCategory, input]
   );
-
-  const cancel = useCallback(() => {
-    setInput(inputCache);
-    setInputCache("");
-    setDeadline(deadlineCache);
-    setDeadlineCache("");
-    setDraftCategory(draftCategoryCache);
-    setDraftCategoryCache(0);
-    setFocus("");
-  }, [deadlineCache, draftCategoryCache, inputCache]);
 
   const onClickEdit = useCallback(
     (item) => {
@@ -792,12 +836,14 @@ function ToDoProvider({ children }) {
 
   const settingsContext = useMemo(
     () => ({
+      deleteAfterDeadline,
       language,
+      setDeleteAfterDeadline,
       setLanguage,
       weekStart,
       setWeekStart,
     }),
-    [language, weekStart]
+    [deleteAfterDeadline, language, weekStart]
   );
 
   const authContext = useMemo(
